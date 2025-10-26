@@ -1,0 +1,3 @@
+/home/skyoker/Documents/CODE/opengl/build/CMakeFiles/Engine2D.dir
+/home/skyoker/Documents/CODE/opengl/build/CMakeFiles/edit_cache.dir
+/home/skyoker/Documents/CODE/opengl/build/CMakeFiles/rebuild_cache.dir
