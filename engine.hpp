@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-
+ 
 enum class DE { Unknown, Hyprland, Sway, GNOME, KDE, XFCE };
 
 struct Vec2 { float x, y; };
@@ -19,6 +19,7 @@ struct Engine2D {
 
     // Fast drawing
     void drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const Vec3& color);
+    void drawRect(const float width, const float height, const Vec3 color, const Vec2 tlpos);
 
 
 
@@ -30,4 +31,5 @@ private:
     int width, height;
 
     GLuint createShaderProgram();
+    Vec2 addVec2pos(const Vec2 pos1, const Vec3 pos2);
 };

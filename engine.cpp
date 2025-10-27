@@ -104,6 +104,24 @@ void Engine2D::drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const V
     glBindVertexArray(0);
 }
 
+void Engine2D::drawRect(const float width, const float height, const Vec3 color, const Vec2 tlpos) {
+    // calculate 4 corners of rect
+
+    Vec2 tl = tlpos;
+    Vec2 tr = {tlpos.x + width, tlpos.y};
+    Vec2 dr = {tlpos.x, tlpos.y + height};
+    Vec2 dl = {tlpos.x + width, tlpos.y + height};
+
+    // 2 triangles needed 
+
+    // first - (tl, dl, tr)
+    // second - (dr, dl, tr)
+
+    drawTriangle(tl, dl, tr, color);
+    drawTriangle(dr, dl, tr, color);
+
+}
+
 // shader creation
 GLuint Engine2D::createShaderProgram() {
 
@@ -125,3 +143,14 @@ GLuint Engine2D::createShaderProgram() {
     return prog;
 }
 
+// Utils
+
+Vec2 addVec2pos(const Vec2 pos1, const Vec2 pos2) {
+    float newx = pos1.x + pos2.x;
+    float newy = pos1.y + pos2.y;
+
+    Vec2 new_pos = { newx, newy};
+
+
+    return new_pos;
+}
