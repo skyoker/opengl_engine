@@ -19,7 +19,7 @@ struct Engine2D {
 
     // Fast drawing
     void drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const Vec3& color);
-    void drawRect(const float width, const float height, const Vec3 color, const Vec2 tlpos);
+    void drawRect(const float width, const float height, const Vec3& color, const Vec2& tlpos);
 
 
 

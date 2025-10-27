@@ -5,7 +5,7 @@ int main() {
 
     Testing testsuite = Testing();
 
-    testsuite.Testdrawtriangle();
+    testsuite.Testdrawrect();
 
     return 0;
 }

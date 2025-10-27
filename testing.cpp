@@ -25,8 +25,18 @@ void Testing::Testdrawtriangle() {
 
 void Testing::Testdrawrect() {
     Engine2D engine(1000, 1000); // 1000 is set in bash so keep
+    while (engine.isRunning()) {
+            engine.beginFrame();
 
-    
+            Vec2 pos = {0.0f, 0.0f}; // middle
+
+            Vec3 red{ 1.0f, 0.0f, 0.0f }; // red
+
+            engine.drawRect(0.5f, 0.5f, red, pos);
+
+            engine.endFrame();
+    }
+
 
 
 }
