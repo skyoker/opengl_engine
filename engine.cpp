@@ -1,4 +1,20 @@
 #include "engine.hpp"
+/*
+for wayland DE to work you have to add the following lines to bashrc or zshrc;
+
+windowrulev2 = float,class:^engine2d$
+windowrulev2 = size 800 600,class:^engine2d$
+windowrulev2 = center,class:^engine2d$
+
+replace engine2d with the title one put under
+replace the size to desired size everything will 
+be vectorized anyway
+*/
+
+
+
+
+
 
 // shaders
 
