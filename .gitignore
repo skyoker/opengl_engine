@@ -1,0 +1,12 @@
+# ignore build and cmake-generated stuff
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
+
+# optional: editor / compiler junk
+*.o
+*.out
+*.a
+*.log
