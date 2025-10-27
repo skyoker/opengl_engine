@@ -3,6 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+
+enum class DE { Unknown, Hyprland, Sway, GNOME, KDE, XFCE };
+
 struct Vec2 { float x, y; };
 struct Vec3 { float r, g, b; };
 
@@ -16,6 +19,8 @@ struct Engine2D {
 
     // Fast drawing
     void drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const Vec3& color);
+
+
 
 private:
     GLFWwindow* window;

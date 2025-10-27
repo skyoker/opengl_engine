@@ -1,7 +1,9 @@
 #include "engine.hpp"
 
 // shaders
-static const char* vertexShaderSrc = R"(
+
+// vertex shader
+static const char* vertexShaderSrc = R"( 
 #version 330 core
 layout(location = 0) in vec2 aPos;
 uniform vec3 uColor;
@@ -12,6 +14,7 @@ void main() {
 }
 )";
 
+// runs ones per pixel inside the shape
 static const char* fragmentShaderSrc = R"(
 #version 330 core
 in vec3 vColor;
@@ -27,10 +30,12 @@ Engine2D::Engine2D(int w, int h, const char* title)
 
     if (!glfwInit()) { std::cerr << "GLFW init failed\n"; exit(EXIT_FAILURE); }
 
-    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    glfwWindowHintString(GLFW_WAYLAND_APP_ID, "engine2d"); // only on wayland or hyperland
+
+    window = glfwCreateWindow(width, height, title, NULL, NULL); // creates window obj
     if (!window) { std::cerr << "Failed to create GLFW window\n"; glfwTerminate(); exit(EXIT_FAILURE); }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window); // set context 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) { std::cerr << "GLEW init failed\n"; glfwTerminate(); exit(EXIT_FAILURE); }
 
@@ -85,6 +90,7 @@ void Engine2D::drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const V
 
 // shader creation
 GLuint Engine2D::createShaderProgram() {
+
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertexShaderSrc, nullptr);
     glCompileShader(vs);
@@ -102,3 +108,4 @@ GLuint Engine2D::createShaderProgram() {
     glDeleteShader(fs);
     return prog;
 }
+
