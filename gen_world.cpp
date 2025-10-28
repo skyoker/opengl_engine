@@ -9,18 +9,14 @@ const int CHUNKS_PER_WORLDY;
 
 void GenWorld::make_world_folder() {
 
-    if (fs::exists(folder_path)) {
+    if (fs::exists(FOLDER_PATH)) {
         // Remove existing folder and all its contents
-        std::cout << "Folder already exists. Deleting existing folder and its contents.\n";
-        fs::remove_all(folder_path);
-        std::cout << "Deleted existing folder.\n";
+        fs::remove_all(FOLDER_PATH);
 
     }
 
     // Create folder
-    std::cout << "Creating world_data folder.\n";
-    fs::create_directory(folder_path);
-    std::cout << "Created folder: " << folder_path << "\n";
+    fs::create_directory(FOLDER_PATH);
 }
 
 
@@ -38,7 +34,7 @@ void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
     chunk_file << "{\n";
     for (int tile_x = 0; tile_x < TILES_PER_CHUNK; ++tile_x) {
         for (int tile_y = 0; tile_y < TILES_PER_CHUNK; ++tile_y) {
-            chunk_file << "    \"t" << tile_x << "x" << tile_y << "y\": {\"type\": \"rock\"}";
+            chunk_file << "    \"t" << tile_x << "x" << tile_y << "y\": {\"type\": \"NULL\"}";
             if (!(tile_x == TILES_PER_CHUNK - 1 && tile_y == TILES_PER_CHUNK - 1)) {
                 chunk_file << ",";
             }
@@ -48,7 +44,6 @@ void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
     chunk_file << "}\n";
     chunk_file.close();
 
-    std::cout << "Created chunk file: " << file_path << "\n";
 }
 
 
@@ -61,5 +56,4 @@ void GenWorld::generate_world() {
         }
     }
 
-    std::cout << "World generation complete.\n";
 }

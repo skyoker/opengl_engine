@@ -55,3 +55,8 @@ void Testing::Testdrawcircle() {
     }
 
 }
+
+void Testing::Testgenworld() {
+    GenWorld genworld;
+    genworld.generate_world();
+}

@@ -14,7 +14,6 @@ struct GenWorld {
 
     const fs::path FOLDER_PATH;
 
-    GenWorld();
     void make_world_folder();
     void create_chunk_file(int chunk_x, int chunk_y);
     void generate_world();

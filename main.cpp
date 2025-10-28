@@ -5,7 +5,7 @@ int main() {
 
     Testing testsuite = Testing();
 
-    testsuite.Testdrawcircle();
+    testsuite.Testgenworld();
 
     return 0;
 }
