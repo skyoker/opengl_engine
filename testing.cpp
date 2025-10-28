@@ -4,7 +4,7 @@ Testing::Testing() {}
 
 
 void Testing::Testdrawtriangle() {
-        Engine2D engine(1000, 1000); // 1000 is set in bash so keep
+        Engine2D engine(800, 800); // 1000 is set in bash so keep
 
         while (engine.isRunning()) {
             engine.beginFrame();
@@ -24,7 +24,7 @@ void Testing::Testdrawtriangle() {
     }
 
 void Testing::Testdrawrect() {
-    Engine2D engine(1000, 1000); // 1000 is set in bash so keep
+    Engine2D engine(800, 800); // 1000 is set in bash so keep
     while (engine.isRunning()) {
             engine.beginFrame();
 
@@ -36,7 +36,20 @@ void Testing::Testdrawrect() {
 
             engine.endFrame();
     }
+}
 
+void Testing::Testdrawcircle() {
+    Engine2D engine(800, 800); // 1000 is set in bash so keep
+    while (engine.isRunning()) {
+            engine.beginFrame();
 
+            Vec2 pos = {0.0f, 0.0f}; // middle
+
+            Vec3 red{ 1.0f, 0.0f, 0.0f }; // red
+
+            engine.drawCircle(1, pos, 8, red);
+
+            engine.endFrame();
+    }
 
 }

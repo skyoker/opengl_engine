@@ -6,4 +6,5 @@ struct Testing {
     Testing();
     void Testdrawtriangle();
     void Testdrawrect();
+    void Testdrawcircle();
 };

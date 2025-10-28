@@ -1,9 +1,12 @@
+#include <cmath>
+#include <iostream>
+
 #include "engine.hpp"
 /*
 for wayland DE to work you have to add the following lines to bashrc or zshrc;
 
 windowrulev2 = float,class:^engine2d$
-windowrulev2 = size 800 600,class:^engine2d$
+windowrulev2 = size 1000 1000,class:^engine2d$
 windowrulev2 = center,class:^engine2d$
 
 replace engine2d with the title one put under
@@ -119,6 +122,21 @@ void Engine2D::drawRect(float width, float height, const Vec3& color, const Vec2
     drawTriangle(br, tr, bl, color);
 }
 
+void Engine2D::drawCircle(float radius, const Vec2& center, int points, Vec3 color) {
+    const double radians_per_triangle = (2.0 * PI) / points; // full circle / # of slices
+
+
+    for (int i = 0; i < points; i++) {
+        // two points on the circle’s edge
+        Vec2 p2 = {center.x + radius * static_cast<float>(cos(i * radians_per_triangle)),
+                   center.y + radius * static_cast<float>(sin(i * radians_per_triangle))};
+        Vec2 p3 = {center.x + radius * static_cast<float>(cos((i + 1) * radians_per_triangle)),
+                   center.y + radius * static_cast<float>(sin((i + 1) * radians_per_triangle))};
+
+        drawTriangle(center, p2, p3, color);
+    }
+}
+
 // shader creation
 GLuint Engine2D::createShaderProgram() {
 
@@ -148,6 +166,16 @@ Vec2 addVec2pos(const Vec2 pos1, const Vec2 pos2) {
 
     Vec2 new_pos = { newx, newy};
 
+
+    return new_pos;
+}
+Vec2 addVec2posx(const Vec2 pos, float tobeadded) {
+    Vec2 new_pos{pos.x + tobeadded, pos.y};
+
+    return {pos.x + tobeadded, pos.y};
+}
+Vec2 addVec2posy(const Vec2 pos, float tobeadded) {
+    Vec2 new_pos{pos.x, pos.y + tobeadded};
 
     return new_pos;
 }
