@@ -1,12 +1,5 @@
 #include "gen_world.hpp"
 
-    
-
-
-const int TILES_PER_CHUNK;
-const int CHUNKS_PER_WORLDX;
-const int CHUNKS_PER_WORLDY;
-
 void GenWorld::make_world_folder() {
 
     if (fs::exists(FOLDER_PATH)) {
@@ -21,9 +14,8 @@ void GenWorld::make_world_folder() {
 
 
 void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
-    fs::path folder_path = "./world_data";
     std::string file_name = "ch" + std::to_string(chunk_x) + "x" + std::to_string(chunk_y) + "y.json";
-    fs::path file_path = folder_path / file_name;
+    fs::path file_path = FOLDER_PATH / file_name;
 
     std::ofstream chunk_file(file_path); // Create and open the file
     if (!chunk_file.is_open()) {

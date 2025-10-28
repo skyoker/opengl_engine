@@ -7,6 +7,9 @@ set(SOURCES
     main.cpp
     engine.cpp
     testing.cpp
+    game_engine.cpp
+    gen_world.cpp
+    world.cpp
 )
 
 # headers

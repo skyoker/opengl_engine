@@ -8,11 +8,11 @@ namespace fs = std::filesystem;
 
 struct GenWorld {
 
-    const int TILES_PER_CHUNK;
-    const int CHUNKS_PER_WORLDX;
-    const int CHUNKS_PER_WORLDY;
+    const int TILES_PER_CHUNK = 8;
+    const int CHUNKS_PER_WORLDX = 10;
+    const int CHUNKS_PER_WORLDY = 10;
 
-    const fs::path FOLDER_PATH;
+    const fs::path FOLDER_PATH = "../world";
 
     void make_world_folder();
     void create_chunk_file(int chunk_x, int chunk_y);
