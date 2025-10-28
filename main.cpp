@@ -5,7 +5,7 @@ int main() {
 
     Testing testsuite = Testing();
 
-    testsuite.Testgenworld();
+    testsuite.TestLoadChunk();
 
     return 0;
 }

@@ -60,3 +60,17 @@ void Testing::Testgenworld() {
     GenWorld genworld;
     genworld.generate_world();
 }
+
+void Testing::TestLoadChunk() {
+    fs::path path_to_world = "../world";
+
+    World world(path_to_world);
+    int xpos = 0;
+    int ypos = 0;
+
+    auto chunk = world.LoadChunk(xpos, ypos);
+    std::cout << "tile t5x9y is " << chunk["t5x9y"]["type"] << "\n";
+    std::cout << "tile t7x1y is " << chunk["t7x1y"]["type"] << "\n";
+    std::cout << "tile t6x3y is " << chunk["t6x3y"]["type"] << "\n";
+
+}

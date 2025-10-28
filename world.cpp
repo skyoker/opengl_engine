@@ -22,13 +22,15 @@ std::map<std::string, std::map<std::string, std::string>> World::LoadChunk(int x
         for (auto& [k, v] : tileValue.items()) {
             tileMap[k] = v.get<std::string>();
         }
-        chunkData[tileKey] = tileMap;
+        chunkData.at(tileKey) = tileMap;
     }
 
     return chunkData;
 }
 
-std::map<std::string, std::string> GetTile(int xpos, int ypos, const std::map<std::string, std::map<std::string, std::string>>& chunk) {
+std::map<std::string, std::string> GetTile(int xpos, int ypos, std::map<std::string, std::map<std::string, std::string>>& chunk) {
+    std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
+    auto tile = chunk.at(tilekey);
+    return tile;
 
-    
 }
