@@ -17,6 +17,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # find packages
 find_package(OpenGL REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 # GLFW
 find_package(PkgConfig REQUIRED)
@@ -33,4 +34,5 @@ target_link_libraries(${PROJECT_NAME}
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${GLFW_LIBRARIES}
+    nlohmann_json::nlohmann_json   # <-- link nlohmann_json properly
 )
