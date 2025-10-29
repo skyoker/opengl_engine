@@ -1,7 +1,7 @@
 #include "world.hpp"
 #include "utils.hpp"
 
-std::map<std::string, std::map<std::string, std::string>> World::LoadChunk(int xpos, int ypos) {
+Chunk World::LoadChunk(int xpos, int ypos) {
     std::string chunkfilename = "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
     fs::path chunkpath = path_to_world / chunkfilename;
 
@@ -25,20 +25,26 @@ std::map<std::string, std::map<std::string, std::string>> World::LoadChunk(int x
         chunkData[tileKey] = tileMap;  // safe insert
     }
 
-    return chunkData;
+    Chunk chunk;
+    chunk.x = xpos;
+    chunk.y = ypos;
+    chunk.name = chunkfilename;
+    chunk.tiles = chunkData;
+
+    return chunk;
 }
 
-std::map<std::string, std::string> GetTile(
-    int xpos, int ypos,
-    std::map<std::string, std::map<std::string, std::string>>& chunk) {
+Tile GetTile(int xpos, int ypos, Chunk chunk) {
 
     std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
-    auto tilePtr = safeloc(chunk, tilekey);
-
+    auto tilePtr = safeloc(chunk.tiles, tilekey);
+    Tile tile;
+    tile.type = tilePtr.
+    
     if (tilePtr)
         return *tilePtr;
     else
-        return {};
+        std::cerr << "Could not find tile " << tilekey << " in chunk " << chunk.name << "\n";
 }
 
 
