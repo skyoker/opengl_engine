@@ -68,9 +68,13 @@ void Testing::TestLoadChunk() {
     int xpos = 0;
     int ypos = 0;
 
+    // 8 tiles per chunk
+    // 100 chunks per world
+    // 10 chunks per axis
+
     auto chunk = world.LoadChunk(xpos, ypos);
-    std::cout << "tile t5x9y is " << chunk["t5x9y"]["type"] << "\n";
-    std::cout << "tile t7x1y is " << chunk["t7x1y"]["type"] << "\n";
+    std::cout << "tile t5x6y is " << chunk["t5x9y"]["type"] << "\n";
+    std::cout << "tile t5x6y is " << chunk["t7x1y"]["type"] << "\n";
     std::cout << "tile t6x3y is " << chunk["t6x3y"]["type"] << "\n";
 
 }

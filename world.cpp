@@ -1,5 +1,5 @@
 #include "world.hpp"
-
+#include "utils.hpp"
 
 std::map<std::string, std::map<std::string, std::string>> World::LoadChunk(int xpos, int ypos) {
     std::string chunkfilename = "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
@@ -12,7 +12,7 @@ std::map<std::string, std::map<std::string, std::string>> World::LoadChunk(int x
     }
 
     json j;
-    file >> j;  // parse the JSON
+    file >> j;
     file.close();
 
     std::map<std::string, std::map<std::string, std::string>> chunkData;
@@ -20,17 +20,25 @@ std::map<std::string, std::map<std::string, std::string>> World::LoadChunk(int x
     for (auto& [tileKey, tileValue] : j.items()) {
         std::map<std::string, std::string> tileMap;
         for (auto& [k, v] : tileValue.items()) {
-            tileMap[k] = v.get<std::string>();
+            tileMap[k] = v.get<std::string>();  // safe insert
         }
-        chunkData.at(tileKey) = tileMap;
+        chunkData[tileKey] = tileMap;  // safe insert
     }
 
     return chunkData;
 }
 
-std::map<std::string, std::string> GetTile(int xpos, int ypos, std::map<std::string, std::map<std::string, std::string>>& chunk) {
-    std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
-    auto tile = chunk.at(tilekey);
-    return tile;
+std::map<std::string, std::string> GetTile(
+    int xpos, int ypos,
+    std::map<std::string, std::map<std::string, std::string>>& chunk) {
 
+    std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
+    auto tilePtr = safeloc(chunk, tilekey);
+
+    if (tilePtr)
+        return *tilePtr;
+    else
+        return {};
 }
+
+

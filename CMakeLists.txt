@@ -10,6 +10,7 @@ set(SOURCES
     game_engine.cpp
     gen_world.cpp
     world.cpp
+    utils.cpp
 )
 
 # headers

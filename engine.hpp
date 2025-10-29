@@ -3,12 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "utils.hpp"
+
 #define PI 3.14159653589738
  
 enum class DE { Unknown, Hyprland, Sway, GNOME, KDE, XFCE };
-
-struct Vec2 { float x, y; };
-struct Vec3 { float r, g, b; };
 
 struct Engine2D {
     Engine2D(int w = 800, int h = 600, const char* title = "2D Engine");
@@ -34,8 +33,5 @@ private:
     int width, height;
 
     GLuint createShaderProgram();
-    Vec2 addVec2pos(const Vec2 pos1, const Vec2 pos2);
-    Vec2 addVec2posx(const Vec2 pos, float tobeadded);
-    Vec2 addVec2posy(const Vec2 pos, float tobeadded);
 };  
 
