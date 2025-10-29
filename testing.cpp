@@ -65,16 +65,48 @@ void Testing::TestLoadChunk() {
     fs::path path_to_world = "../world";
 
     World world(path_to_world);
-    int xpos = 0;
-    int ypos = 0;
+    int xpos;
+    int ypos;
 
     // 8 tiles per chunk
     // 100 chunks per world
     // 10 chunks per axis
+    Chunk chunk;
 
-    auto chunk = world.LoadChunk(xpos, ypos);
-    std::cout << "tile t5x6y is " << chunk["t5x9y"]["type"] << "\n";
-    std::cout << "tile t5x6y is " << chunk["t7x1y"]["type"] << "\n";
-    std::cout << "tile t6x3y is " << chunk["t6x3y"]["type"] << "\n";
+    for (int x = 0; x < 10; x++) {
+        for (int y = 0; y < 10; y++) {
+            xpos = x;
+            ypos = y;
+            chunk = world.LoadChunk(xpos, ypos);
+
+            std::cout << "Chunk: " << chunk.name << " at pos " << chunk.x << " and " << chunk.y << "\n";
+
+        }
+
+    }
+    
+}
+
+void Testing::TestGetTile() {
+    fs::path path_to_world = "../world";
+    World world(path_to_world);
+    
+    Chunk chunk;
+    Tile tile;
+
+    chunk = world.LoadChunk(0, 0);
+    // 8 tiles per chunk
+    // 100 chunks per world
+    // 10 chunks per axis
+
+    for (int x = 0; x < 8; x++) {
+        for (int y = 0; y < 8; y++) {
+            tile = world.GetTile(x, y, chunk);
+
+            std::cout << "Tile: " << tile.x << "x " << tile.y << "y is type " << tile.type << "\n";
+
+        }
+
+    }
 
 }

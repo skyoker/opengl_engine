@@ -6,21 +6,11 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 
+#include "utils.hpp"
+
 using json = nlohmann::json;
 
 namespace fs = std::filesystem;
-
-struct World {
-    const int player_init_posx;
-    const int player_init_posy;
-
-    fs::path path_to_world; 
-
-    World(const fs::path& Worldpath) : path_to_world(Worldpath) {}
-
-    Chunk LoadChunk(int xpos, int ypos);
-    auto GetTile(int xpos, int ypos, const Chunk chunk);
-};
 
 struct Chunk {
     std::string name;
@@ -35,3 +25,17 @@ struct Tile {
     std::string type;
 
 };
+
+struct World {
+    int player_init_posx;
+    int player_init_posy;
+
+    fs::path path_to_world; 
+
+    World(const fs::path& Worldpath) : path_to_world(Worldpath) {}
+
+    Chunk LoadChunk(int xpos, int ypos);
+    Tile GetTile(int xpos, int ypos, const Chunk& chunk);
+};
+
+

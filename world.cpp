@@ -20,9 +20,9 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     for (auto& [tileKey, tileValue] : j.items()) {
         std::map<std::string, std::string> tileMap;
         for (auto& [k, v] : tileValue.items()) {
-            tileMap[k] = v.get<std::string>();  // safe insert
+            tileMap[k] = v.get<std::string>();
         }
-        chunkData[tileKey] = tileMap;  // safe insert
+        chunkData[tileKey] = tileMap;
     }
 
     Chunk chunk;
@@ -34,17 +34,25 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     return chunk;
 }
 
-Tile GetTile(int xpos, int ypos, Chunk chunk) {
-
+Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
     std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
-    auto tilePtr = safeloc(chunk.tiles, tilekey);
     Tile tile;
-    tile.type = tilePtr.
-    
-    if (tilePtr)
-        return *tilePtr;
-    else
-        std::cerr << "Could not find tile " << tilekey << " in chunk " << chunk.name << "\n";
+    tile.x = xpos;
+    tile.y = ypos;
+
+    // safely find the tile
+    auto tilePtr = safeloc(chunk.tiles, tilekey);
+    if (!tilePtr) return tile; // missing tile, return empty tile
+
+    // safely find "type" key inside tile
+    std::string type_str = "type";
+    auto typePtr = safeloc(*tilePtr, type_str);
+    if (typePtr)
+        tile.type = *typePtr;
+
+    return tile;
 }
+
+
 
 

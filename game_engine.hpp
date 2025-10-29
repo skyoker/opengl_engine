@@ -21,7 +21,7 @@ struct Player {
 
     Vec2 player_pos;
 
-    void move_player(Vec2 amount)
+    void move_player(Vec2 amount);
 
     // void Drawplayer()
 };
@@ -36,4 +36,4 @@ struct GameEngine {
     void StartEngine();
 
 
-}
+};

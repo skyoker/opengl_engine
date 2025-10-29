@@ -3,6 +3,7 @@
 #include "engine.hpp"
 #include "gen_world.hpp"
 #include "world.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 
@@ -19,4 +20,5 @@ struct Testing {
     void Testdrawcircle();
     void Testgenworld();
     void TestLoadChunk();
+    void TestGetTile();
 };

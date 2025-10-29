@@ -5,7 +5,7 @@ int main() {
 
     Testing testsuite = Testing();
 
-    testsuite.TestLoadChunk();
+    testsuite.TestGetTile();
 
     return 0;
 }
