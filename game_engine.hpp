@@ -10,6 +10,10 @@ the game engine handels:
 1. the drawing of the current screen 
 2. game loop
 3. player pos and drawing
+4. animations
+5. chunk loading
+6. interactions
+7. inputs
 
 
 */
@@ -30,10 +34,18 @@ struct GameEngine {
     int screen_width;
     int screen_height;
     World world;
+    int fps;
 
     GameEngine(const int screenwidth, const int screenheight, World world_i) : screen_height(screenheight), screen_width(screen_width), world(world_i) {}
 
-    void StartEngine();
+    void StartEngine(); // main loop
+    struct Window {
+        Vec2 window_pos; // top left corner
+        int window_width;
+        Chunks chunks_in_window();
+    };
+    void DrawWindow(Window window);
+    
 
 
 };

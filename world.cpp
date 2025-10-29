@@ -53,6 +53,11 @@ Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
     return tile;
 }
 
+void Chunks::add_chunk(Chunk& chunk_to_be_added) {
 
+    chunks.push_back(chunk_to_be_added);
+}
 
-
+void Chunks::clear_chunks() {
+    chunks.clear();
+}

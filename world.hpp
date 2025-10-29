@@ -1,10 +1,12 @@
 #pragma once
+
 #include <filesystem>
 #include <fstream>
 #include <map>
 #include <string>
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <vector>
 
 #include "utils.hpp"
 
@@ -26,9 +28,15 @@ struct Tile {
 
 };
 
+struct Chunks {
+    std::vector<Chunk> chunks;
+
+    void add_chunk(Chunk& chunk_to_be_added);
+    void clear_chunks();
+};
+
 struct World {
-    int player_init_posx;
-    int player_init_posy;
+    const Vec2 spawnpoint = {0, 0};
 
     fs::path path_to_world; 
 
