@@ -44,6 +44,9 @@ struct World {
 
     Chunk LoadChunk(int xpos, int ypos);
     Tile GetTile(int xpos, int ypos, const Chunk& chunk);
+    private:
+    std::map<std::string, int> get_info();
+    int get_tiles
 };
 
 

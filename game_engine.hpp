@@ -3,20 +3,17 @@
 #include "world.hpp"
 #include "utils.hpp"
 
-
 /*
-
-the game engine handels:
-1. the drawing of the current screen 
-2. game loop
-3. player pos and drawing
-4. animations
-5. chunk loading
-6. interactions
-7. inputs
-
-
+The game engine handles:
+1. Drawing of the current screen
+2. Game loop
+3. Player pos and drawing
+4. Animations
+5. Chunk loading
+6. Interactions
+7. Inputs
 */
+
 struct Player {
     int chunkx;
     int chunky;
@@ -26,26 +23,33 @@ struct Player {
     Vec2 player_pos;
 
     void move_player(Vec2 amount);
-
-    // void Drawplayer()
+    // void DrawPlayer();
 };
 
 struct GameEngine {
     int screen_width;
     int screen_height;
-    World world;
     int fps;
 
-    GameEngine(const int screenwidth, const int screenheight, World world_i) : screen_height(screenheight), screen_width(screen_width), world(world_i) {}
+    World world;
+
+    GameEngine(int screenwidth, int screenheight, const World& world_i)
+        : screen_width(screenwidth), screen_height(screenheight), world(world_i) {}
 
     void StartEngine(); // main loop
+
     struct Window {
-        Vec2 window_pos; // top left corner
-        int window_width;
+        Window(Vec2 pos, int size)
+        : window_pos(pos), window_size(size) {}
+
+        Vec2 window_pos;   // top-left corner
+        int window_size;
+        World world;
+
+        // ‘Chunks’ isn’t defined anywhere yet — assuming you meant std::vector<Chunk>
         Chunks chunks_in_window();
+        int tiles_across;
     };
-    void DrawWindow(Window window);
-    
 
-
+    void DrawWindow(const Window& window);
 };

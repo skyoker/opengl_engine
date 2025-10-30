@@ -38,10 +38,28 @@ void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
 
 }
 
+void GenWorld::create_meta_file(int tiles_per_chunk, int chunks_per_worldx, int chunks_per_worldy) {
+    std::string filename = "world_info.json";
+    fs::path file_path = FOLDER_PATH / filename;
 
+    std::ofstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to create meta file: " << file_path << "\n";
+        return;
+    }
+
+    file << "{\n";
+    file << "    \"tiles_per_chunk\": " << tiles_per_chunk << ",\n";
+    file << "    \"chunks_per_worldx\": " << chunks_per_worldx << ",\n";
+    file << "    \"chunks_per_worldy\": " << chunks_per_worldy << "\n";
+    file << "}\n";
+
+    file.close();
+}
 void GenWorld::generate_world() {
     make_world_folder();
-    
+    create_meta_file(TILES_PER_CHUNK, CHUNKS_PER_WORLDX, CHUNKS_PER_WORLDY);
+
     for (int chunk_x = 0; chunk_x < CHUNKS_PER_WORLDX; ++chunk_x) {
         for (int chunk_y = 0; chunk_y < CHUNKS_PER_WORLDY; ++chunk_y) {
             create_chunk_file(chunk_x, chunk_y);
@@ -49,3 +67,4 @@ void GenWorld::generate_world() {
     }
 
 }
+

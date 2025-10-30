@@ -6,3 +6,12 @@ void Player::move_player(Vec2 amount) {
     Player::player_pos = newpos;
 }
 
+void GameEngine::StartEngine() {
+
+
+}
+
+Chunks GameEngine::Window::chunks_in_window() {
+    world.
+
+}
