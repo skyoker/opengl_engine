@@ -46,7 +46,11 @@ struct World {
     Tile GetTile(int xpos, int ypos, const Chunk& chunk);
     private:
     std::map<std::string, int> get_info();
-    int get_tiles
+
+    int get_tiles_per_chun;
+    int chunks_per_worldx;
+    int chunks_per_worldy = safeloc(get_info(), std::string("chunks_per_worldy"));
+
 };
 
 

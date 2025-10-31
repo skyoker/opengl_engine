@@ -59,5 +59,6 @@ void Chunks::add_chunk(Chunk& chunk_to_be_added) {
 }
 
 void Chunks::clear_chunks() {
+
     chunks.clear();
 }

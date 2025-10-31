@@ -46,7 +46,6 @@ struct GameEngine {
         int window_size;
         World world;
 
-        // ‘Chunks’ isn’t defined anywhere yet — assuming you meant std::vector<Chunk>
         Chunks chunks_in_window();
         int tiles_across;
     };
