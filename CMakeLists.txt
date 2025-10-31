@@ -3,6 +3,7 @@ project(Engine2D)
 set(CMAKE_CXX_STANDARD 17)
 
 # sources
+
 set(SOURCES
     main.cpp
     engine.cpp

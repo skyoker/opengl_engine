@@ -60,5 +60,28 @@ void Chunks::add_chunk(Chunk& chunk_to_be_added) {
 
 void Chunks::clear_chunks() {
 
+
     chunks.clear();
+}
+
+WorldInfo WorldInfo::get_info() {
+    std::string filename = "world_info.json";
+    fs::path filepath = folder_path / filename;
+    
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open world info: " << filepath << "\n";
+        return; // return empty/default
+    }
+
+    json j;
+    file >> j;
+    file.close();
+
+    WorldInfo worldinfo(folder_path);
+    worldinfo.tiles_per_chunk   = j.value("tiles_per_chunk", 0);
+    worldinfo.chunks_per_worldx = j.value("chunks_per_worldx", 0);
+    worldinfo.chunks_per_worldy = j.value("chunks_per_worldy", 0);
+
+    return worldinfo;
 }

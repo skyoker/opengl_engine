@@ -14,6 +14,19 @@ using json = nlohmann::json;
 
 namespace fs = std::filesystem;
 
+struct WorldInfo {
+    WorldInfo(fs::path FOLDER_PATH) : folder_path(FOLDER_PATH) {} 
+
+    fs::path folder_path;
+    int tiles_per_chunk;
+    int chunks_per_worldx;
+    int chunks_per_worldy;
+
+    private:
+    WorldInfo get_info();
+
+};
+
 struct Chunk {
     std::string name;
     int x;
@@ -44,13 +57,10 @@ struct World {
 
     Chunk LoadChunk(int xpos, int ypos);
     Tile GetTile(int xpos, int ypos, const Chunk& chunk);
-    private:
-    std::map<std::string, int> get_info();
+    WorldInfo worldinfo;
 
-    int get_tiles_per_chun;
-    int chunks_per_worldx;
-    int chunks_per_worldy = safeloc(get_info(), std::string("chunks_per_worldy"));
 
 };
+
 
 
