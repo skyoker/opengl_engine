@@ -45,3 +45,11 @@ Tiles GameEngine::Window::tiles_in_window() {
     return tiles_in_win;
 }
 
+
+
+void DrawTile(Vec2 pos, const Tile& tile) {
+    std::string tiletype = tile.type;
+    switch tiletype;
+    
+
+}

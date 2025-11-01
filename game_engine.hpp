@@ -64,8 +64,8 @@ struct GameEngine {
     };
 
 
-    void DrawTile(Vec2 pos, );
-    void DrawChunk()
+    void DrawTile(Vec2 pos, const Tile& tile);
+    void DrawChunk(const Chunk& chunk);
     void DrawWindow(const Window& window);
 
 };

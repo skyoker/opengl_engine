@@ -25,6 +25,7 @@ struct Chunk {
 struct Tile {
     int x;
     int y;
+    Vec2 chunk_pos;
     std::string type;
 
 };
