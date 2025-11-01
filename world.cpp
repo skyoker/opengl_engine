@@ -15,24 +15,24 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     file >> j;
     file.close();
 
-    std::map<std::string, std::map<std::string, std::string>> chunkData;
-
-    for (auto& [tileKey, tileValue] : j.items()) {
-        std::map<std::string, std::string> tileMap;
-        for (auto& [k, v] : tileValue.items()) {
-            tileMap[k] = v.get<std::string>();
-        }
-        chunkData[tileKey] = tileMap;
-    }
-
     Chunk chunk;
     chunk.x = xpos;
     chunk.y = ypos;
     chunk.name = chunkfilename;
-    chunk.tiles = chunkData;
+
+    // convert JSON tiles into Tile structs
+    for (auto& [tileKey, tileValue] : j.items()) {
+        Tile tile;
+        tile.x = tileValue.value("x", 0);
+        tile.y = tileValue.value("y", 0);
+        tile.type = tileValue.value("type", "NULL");
+
+        chunk.tiles.add_tile(tile);  // use your Tiles::add_tile method
+    }
 
     return chunk;
 }
+
 
 Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
     std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
@@ -64,9 +64,19 @@ void Chunks::clear_chunks() {
     chunks.clear();
 }
 
-WorldInfo WorldInfo::get_info() {
+void Tiles::add_tile(const Tile& tile_to_be_added) {
+
+    tiles.push_back(tile_to_be_added);
+}
+
+void Tiles::clear_tiles() {
+    tiles.clear();
+
+}
+
+void World::get_info() {
     std::string filename = "world_info.json";
-    fs::path filepath = folder_path / filename;
+    fs::path filepath = path_to_world / filename;
     
     std::ifstream file(filepath);
     if (!file.is_open()) {
@@ -78,10 +88,8 @@ WorldInfo WorldInfo::get_info() {
     file >> j;
     file.close();
 
-    WorldInfo worldinfo(folder_path);
-    worldinfo.tiles_per_chunk   = j.value("tiles_per_chunk", 0);
-    worldinfo.chunks_per_worldx = j.value("chunks_per_worldx", 0);
-    worldinfo.chunks_per_worldy = j.value("chunks_per_worldy", 0);
+    tiles_per_chunk   = j.value("tiles_per_chunk", 0);
+    chunks_per_worldx = j.value("chunks_per_worldx", 0);
+    chunks_per_worldy = j.value("chunks_per_worldy", 0);
 
-    return worldinfo;
 }

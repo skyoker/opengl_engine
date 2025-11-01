@@ -31,6 +31,9 @@ struct GameEngine {
     int screen_height;
     int fps;
 
+    const int tiles_on_screenx = 15;
+    const int tiles_on_screeny = 15;
+
     World world;
 
     GameEngine(int screenwidth, int screenheight, const World& world_i)
@@ -39,16 +42,30 @@ struct GameEngine {
     void StartEngine(); // main loop
 
     struct Window {
+        
         Window(Vec2 pos, int size)
         : window_pos(pos), window_size(size) {}
 
-        Vec2 window_pos;   // top-left corner
-        int window_size;
-        World world;
+        Tiles tiles_in_win =  tiles_in_window();
 
-        Chunks chunks_in_window();
-        int tiles_across;
+
+
+        private:
+        Vec2 window_pos;   // top-left corner
+        int window_size; // in unit Tiles
+
+        World world;
+        Chunks chunks_in_window(); // function
+        Tiles tiles_in_window();
+
+        Chunks chunks_in_win = chunks_in_window();
+
+
     };
 
+
+    void DrawTile(Vec2 pos, );
+    void DrawChunk()
     void DrawWindow(const Window& window);
+
 };
