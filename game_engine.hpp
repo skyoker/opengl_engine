@@ -15,18 +15,6 @@ The game engine handles:
 7. Inputs
 */
 
-struct Player {
-    int chunkx;
-    int chunky;
-    int tilex;
-    int tiley;
-
-    Vec2 player_pos;
-
-    void move_player(Vec2 amount);
-    // void DrawPlayer();
-};
-
 struct GameEngine {
     int screen_width;
     int screen_height;
@@ -38,35 +26,57 @@ struct GameEngine {
     2.0f / static_cast<float>(tiles_on_screeny)
     };
     World world;
+    Engine2D engine;
 
     
     GameEngine(int screenwidth, int screenheight, const World& world_i)
         : screen_width(screenwidth), screen_height(screenheight), world(world_i) {}
 
-    void StartEngine(); // main loop
+
 
     struct Window {
-        
-        Window(Vec2 pos, int size)
-        : window_pos(pos), window_size(size) {}
+        World& world; // reference to the same world as GameEngine
 
-        Tiles tiles_in_win =  tiles_in_window();
-        Vec2 window_pos; // in unit Tiles
+        Window(World& w, Vec2 pos, int size)
+            : world(w), window_pos(pos), window_size(size) {}
 
 
-        private:
-           // top-left corner
-        int window_size; // in unit Tiles
+            Tiles tiles_in_win =  tiles_in_window();
+            Vec2 window_pos; // in unit Tiles
 
-        Chunks chunks_in_window(); // function
-        Tiles tiles_in_window();
 
-        Chunks chunks_in_win = chunks_in_window();
+            private:
+            // top-left corner
+            int window_size; // in unit Tiles
+
+            Chunks chunks_in_window(); // function
+            Tiles tiles_in_window();
+
+            Chunks chunks_in_win = chunks_in_window();
 
 
     };
+    struct Player {
+        World& world;
+        Engine2D& engine;
+
+        int chunkx;
+        int chunky;
+        int tilex;
+        int tiley;
 
 
+        Player(Engine2D& e) : engine(e) {}
+
+        Vec2 world_player_pos;
+        Vec2 player_pos_on_screen;
+
+        void move_player(Vec2 amount);
+        void DrawPlayer();
+    };
+
+    
+    void StartEngine(); // main loop
     void DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine);
     void DrawWindow(const Window& window, Engine2D& engine);
 

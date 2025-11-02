@@ -1,13 +1,16 @@
 #include "game_engine.hpp"
+    
 
-
-void Player::move_player(Vec2 amount) {
+void GameEngine::Player::move_player(Vec2 amount) {
     auto newpos = addVec2pos(Player::player_pos, amount);
     Player::player_pos = newpos;
 }
 
-void GameEngine::StartEngine() {
+void GameEngine::Player::DrawPlayer() {
+    Vec3 player_color = {1.0f, 0.0f, 0.0f}; // red
 
+    if (!engine.isRunning()) return; std::cerr << "window is not running cannot draw player";
+    engine.drawRect(tilesize_on_screen.x, tilesize_on_screen.y, player_color, player_pos_on_screen);
 
 }
 
@@ -77,6 +80,8 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
 
 void GameEngine::StartEngine() {
     Engine2D engine(screen_width, screen_height);
+    Player player;
+
     while (engine.isRunning()) {
         engine.beginFrame();
         //logic goes here
@@ -89,8 +94,8 @@ void GameEngine::StartEngine() {
 void GameEngine::DrawWindow(const Window& window, Engine2D& engine) {
     for (const auto& tile : window.tiles_in_win.tiles) {
         // Compute world/global tile coordinates
-        int world_x = static_cast<int>(tile.chunk_pos.x) * world.tiles_per_chunk + tile.x;
-        int world_y = static_cast<int>(tile.chunk_pos.y) * world.tiles_per_chunk + tile.y;
+        int world_x = static_cast<int>(tile.chunk_pos.x) * world.tiles_per_chunk + tile.inside_chunk_pos.x;
+        int world_y = static_cast<int>(tile.chunk_pos.y) * world.tiles_per_chunk + tile.inside_chunk_pos.y;
 
         // Convert to screen coordinates relative to window/camera
         Vec2 tile_screen_pos = {

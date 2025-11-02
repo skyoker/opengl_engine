@@ -22,8 +22,9 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     // convert JSON tiles into Tile structs
     for (auto& [tileKey, tileValue] : j.items()) {
         Tile tile;
-        tile.x = tileValue.value("x", 0);
-        tile.y = tileValue.value("y", 0);
+        tile.inside_chunk_pos.x = tileValue.value("x", 0);
+        tile.inside_chunk_pos.y = tileValue.value("y", 0);
+        tile.chunk_pos = chunk.pos;
         tile.type = StringToTileType(tileValue.value("type", "null"));
 
         chunk.tiles.add_tile(tile);
@@ -34,13 +35,13 @@ Chunk World::LoadChunk(int xpos, int ypos) {
 
 Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
     Tile tile;
-    tile.x = xpos;
-    tile.y = ypos;
+    tile.inside_chunk_pos.x = xpos;
+    tile.inside_chunk_pos.y = ypos;
     tile.chunk_pos = chunk.pos;
     
     // Find the matching tile in the chunk
     for (const auto& t : chunk.tiles.tiles) {
-        if (t.x == xpos && t.y == ypos) {
+        if (t.inside_chunk_pos.x == xpos && t.inside_chunk_pos.y == ypos) {
             return t;
         }
     }

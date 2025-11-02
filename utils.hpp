@@ -15,9 +15,9 @@ enum class TileType {
 
 
 inline TileType StringToTileType(const std::string& str) {
-    if (str == "grass") return TileType::Rock;
+    if (str == "rock") return TileType::Rock;
     if (str == "water") return TileType::Wall;
-    if (str == "null")  return TileType::Null;
+    if (str == "NULL")  return TileType::Null;
 
     std::cerr << "no tiletype detected: " << '\n';
     return TileType::Unknown;

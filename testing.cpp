@@ -79,7 +79,7 @@ void Testing::TestLoadChunk() {
             ypos = y;
             chunk = world.LoadChunk(xpos, ypos);
 
-            std::cout << "Chunk: " << chunk.name << " at pos " << chunk.x << " and " << chunk.y << "\n";
+            std::cout << "Chunk: " << chunk.name << " at pos " << chunk.pos.x << " and " << chunk.pos.y << "\n";
 
         }
 
@@ -103,7 +103,7 @@ void Testing::TestGetTile() {
         for (int y = 0; y < 8; y++) {
             tile = world.GetTile(x, y, chunk);
 
-            std::cout << "Tile: " << tile.inside_chunk_pos.x << "x " << tile.inside_chunk_pos.y << "y is type " << tile.type << "\n";
+            std::cout << "Tile: " << tile.inside_chunk_pos.x << "x " << tile.inside_chunk_pos.y << "y is type " << TileTypeToString(tile.type) << "\n";
 
         }
 
@@ -128,7 +128,7 @@ void Testing::TestDrawTile() {
         engine.beginFrame();
 
         for (const auto& tile : chunk.tiles.tiles) {
-            Vec2 screenPos = {0.0f, 0.0f};
+            Vec2 screenPos = {-1.0f, 0.0f};
             gameEngine.DrawTile(screenPos, tile, engine);
         }
 
