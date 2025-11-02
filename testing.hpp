@@ -1,11 +1,13 @@
 #pragma once
+#include <iostream>
+
 
 #include "engine.hpp"
 #include "gen_world.hpp"
 #include "world.hpp"
 #include "utils.hpp"
+#include "game_engine.hpp"
 
-#include <iostream>
 
 
 #define SCREEN_HEIGHT 1000  // 1000 is set in bash so keep
@@ -21,4 +23,7 @@ struct Testing {
     void Testgenworld();
     void TestLoadChunk();
     void TestGetTile();
+    void TestDrawTile();
+    void TestDrawWindow();
+
 };

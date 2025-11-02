@@ -103,10 +103,35 @@ void Testing::TestGetTile() {
         for (int y = 0; y < 8; y++) {
             tile = world.GetTile(x, y, chunk);
 
-            std::cout << "Tile: " << tile.x << "x " << tile.y << "y is type " << tile.type << "\n";
+            std::cout << "Tile: " << tile.inside_chunk_pos.x << "x " << tile.inside_chunk_pos.y << "y is type " << tile.type << "\n";
 
         }
 
     }
 
+}
+
+void Testing::TestDrawTile() {
+    Engine2D engine(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    // World auto-loads its info now
+    World world("../world");
+
+    // Make the GameEngine
+    GameEngine gameEngine(SCREEN_WIDTH, SCREEN_HEIGHT, world);
+
+    // Load one chunk for testing (like 0,0)
+    Chunk chunk = world.LoadChunk(0, 0);
+
+    // Main loop
+    while (engine.isRunning()) {
+        engine.beginFrame();
+
+        for (const auto& tile : chunk.tiles.tiles) {
+            Vec2 screenPos = {0.0f, 0.0f};
+            gameEngine.DrawTile(screenPos, tile, engine);
+        }
+
+        engine.endFrame();
+    }
 }

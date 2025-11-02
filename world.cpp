@@ -16,8 +16,7 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     file.close();
 
     Chunk chunk;
-    chunk.x = xpos;
-    chunk.y = ypos;
+    chunk.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
     chunk.name = chunkfilename;
 
     // convert JSON tiles into Tile structs
@@ -25,31 +24,29 @@ Chunk World::LoadChunk(int xpos, int ypos) {
         Tile tile;
         tile.x = tileValue.value("x", 0);
         tile.y = tileValue.value("y", 0);
-        tile.type = tileValue.value("type", "NULL");
+        tile.type = StringToTileType(tileValue.value("type", "null"));
 
-        chunk.tiles.add_tile(tile);  // use your Tiles::add_tile method
+        chunk.tiles.add_tile(tile);
     }
 
     return chunk;
 }
 
-
 Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
-    std::string tilekey = "t" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y";
     Tile tile;
     tile.x = xpos;
     tile.y = ypos;
-
-    // safely find the tile
-    auto tilePtr = safeloc(chunk.tiles, tilekey);
-    if (!tilePtr) return tile; // missing tile, return empty tile
-
-    // safely find "type" key inside tile
-    std::string type_str = "type";
-    auto typePtr = safeloc(*tilePtr, type_str);
-    if (typePtr)
-        tile.type = *typePtr;
-
+    tile.chunk_pos = chunk.pos;
+    
+    // Find the matching tile in the chunk
+    for (const auto& t : chunk.tiles.tiles) {
+        if (t.x == xpos && t.y == ypos) {
+            return t;
+        }
+    }
+    
+    // If no tile found, return unknown type
+    tile.type = TileType::Unknown;
     return tile;
 }
 

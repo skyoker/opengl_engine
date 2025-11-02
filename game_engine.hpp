@@ -2,6 +2,7 @@
 
 #include "world.hpp"
 #include "utils.hpp"
+#include "engine.hpp"
 
 /*
 The game engine handles:
@@ -30,12 +31,15 @@ struct GameEngine {
     int screen_width;
     int screen_height;
     int fps;
-
     const int tiles_on_screenx = 15;
     const int tiles_on_screeny = 15;
-
+    Vec2 tilesize_on_screen = {
+    2.0f / static_cast<float>(tiles_on_screenx),
+    2.0f / static_cast<float>(tiles_on_screeny)
+    };
     World world;
 
+    
     GameEngine(int screenwidth, int screenheight, const World& world_i)
         : screen_width(screenwidth), screen_height(screenheight), world(world_i) {}
 
@@ -47,14 +51,13 @@ struct GameEngine {
         : window_pos(pos), window_size(size) {}
 
         Tiles tiles_in_win =  tiles_in_window();
-
+        Vec2 window_pos; // in unit Tiles
 
 
         private:
-        Vec2 window_pos;   // top-left corner
+           // top-left corner
         int window_size; // in unit Tiles
 
-        World world;
         Chunks chunks_in_window(); // function
         Tiles tiles_in_window();
 
@@ -64,8 +67,7 @@ struct GameEngine {
     };
 
 
-    void DrawTile(Vec2 pos, const Tile& tile);
-    void DrawChunk(const Chunk& chunk);
-    void DrawWindow(const Window& window);
+    void DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine);
+    void DrawWindow(const Window& window, Engine2D& engine);
 
 };

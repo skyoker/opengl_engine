@@ -47,9 +47,57 @@ Tiles GameEngine::Window::tiles_in_window() {
 
 
 
-void DrawTile(Vec2 pos, const Tile& tile) {
-    std::string tiletype = tile.type;
-    switch tiletype;
-    
+void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
+    if (!engine.isRunning()) {
+    std::cerr << "Engine is not running, cannot draw to screen.\n";
+    return;
+    }
+    Vec3 white = {1.0f, 1.0f, 1.0f};
 
+
+    switch (tile.type) {
+        case TileType::Null:
+
+            engine.drawRect(tilesize_on_screen.x, tilesize_on_screen.y, white, pos);
+
+            
+            break;
+        case TileType::Wall:
+            // draw wall tile at pos
+            break;
+
+        case TileType::Rock:
+            // draw rock tile at pos
+            break;
+        case TileType::Unknown:
+            // draw unknown tile at pos
+            break;
+    }
+}
+
+void GameEngine::StartEngine() {
+    Engine2D engine(screen_width, screen_height);
+    while (engine.isRunning()) {
+        engine.beginFrame();
+        //logic goes here
+        engine.endFrame();
+
+
+    }
+}
+
+void GameEngine::DrawWindow(const Window& window, Engine2D& engine) {
+    for (const auto& tile : window.tiles_in_win.tiles) {
+        // Compute world/global tile coordinates
+        int world_x = static_cast<int>(tile.chunk_pos.x) * world.tiles_per_chunk + tile.x;
+        int world_y = static_cast<int>(tile.chunk_pos.y) * world.tiles_per_chunk + tile.y;
+
+        // Convert to screen coordinates relative to window/camera
+        Vec2 tile_screen_pos = {
+            (world_x - window.window_pos.x) * tilesize_on_screen.x,
+            (world_y - window.window_pos.y) * tilesize_on_screen.y
+        };
+
+        DrawTile(tile_screen_pos, tile, engine);
+    }
 }
