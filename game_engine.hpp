@@ -4,80 +4,56 @@
 #include "utils.hpp"
 #include "engine.hpp"
 
-/*
-The game engine handles:
-1. Drawing of the current screen
-2. Game loop
-3. Player pos and drawing
-4. Animations
-5. Chunk loading
-6. Interactions
-7. Inputs
-*/
-
 struct GameEngine {
-    int screen_width;
-    int screen_height;
-    int fps;
+    int screen_width = 0;
+    int screen_height = 0;
+    int fps = 60;
+
     const int tiles_on_screenx = 15;
     const int tiles_on_screeny = 15;
+
     Vec2 tilesize_on_screen = {
-    2.0f / static_cast<float>(tiles_on_screenx),
-    2.0f / static_cast<float>(tiles_on_screeny)
+        2.0f / static_cast<float>(tiles_on_screenx),
+        2.0f / static_cast<float>(tiles_on_screeny)
     };
-    World world;
-    Engine2D engine;
 
-    
-    GameEngine(int screenwidth, int screenheight, const World& world_i)
-        : screen_width(screenwidth), screen_height(screenheight), world(world_i) {}
+    Engine2D* engine = nullptr; // manually set this later
+    World* world = nullptr;     // manually set this later
 
-
-
+    // --- WINDOW STRUCT ---
     struct Window {
-        World& world; // reference to the same world as GameEngine
+        World* world = nullptr;
+        Vec2 window_pos;
+        int window_sizex = 0;
+        int window_sizey = 0;
 
-        Window(World& w, Vec2 pos, int size)
-            : world(w), window_pos(pos), window_size(size) {}
+        Chunks chunks_in_window(); // function
+        Tiles tiles_in_window();
 
-
-            Tiles tiles_in_win =  tiles_in_window();
-            Vec2 window_pos; // in unit Tiles
-
-
-            private:
-            // top-left corner
-            int window_size; // in unit Tiles
-
-            Chunks chunks_in_window(); // function
-            Tiles tiles_in_window();
-
-            Chunks chunks_in_win = chunks_in_window();
-
-
+        Chunks chunks_in_win;
+        Tiles tiles_in_win;
     };
+
+    // --- PLAYER STRUCT ---
     struct Player {
-        World& world;
-        Engine2D& engine;
-
-        int chunkx;
-        int chunky;
-        int tilex;
-        int tiley;
-
-
-        Player(Engine2D& e) : engine(e) {}
+        Engine2D* engine = nullptr;
+        Vec2 tilesize_on_screen;
 
         Vec2 world_player_pos;
         Vec2 player_pos_on_screen;
+
+        int chunkx = 0;
+        int chunky = 0;
+        int tilex = 0;
+        int tiley = 0;
 
         void move_player(Vec2 amount);
         void DrawPlayer();
     };
 
-    
-    void StartEngine(); // main loop
+    // --- ENGINE FUNCTIONS ---
+    void StartEngine(); 
     void DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine);
-    void DrawWindow(const Window& window, Engine2D& engine);
-
+    void DrawWindow(const Window& window, Engine2D& engine, World& world);
 };
+
