@@ -51,6 +51,7 @@ struct World {
 
     Chunk LoadChunk(int xpos, int ypos);
     Tile GetTile(int xpos, int ypos, const Chunk& chunk);
+    Tile GetTileGlobal(int worldx, int worldy);
 
     int tiles_per_chunk;
     int chunks_per_worldx;

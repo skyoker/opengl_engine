@@ -91,3 +91,12 @@ void World::get_info() {
     chunks_per_worldy = j.value("chunks_per_worldy", 0);
 
 }
+
+Tile World::GetTileGlobal(int world_x, int world_y) {
+    int chunk_x = world_x / tiles_per_chunk;
+    int chunk_y = world_y / tiles_per_chunk;
+    int tile_x = world_x % tiles_per_chunk;
+    int tile_y = world_y % tiles_per_chunk;
+
+    return chunks[{chunk_x, chunk_y}].tiles.get_tile(tile_x, tile_y);
+}

@@ -4,9 +4,26 @@
 
 // --- PLAYER ---
 
-void GameEngine::Player::move_player(Vec2 amount) {
-    world_player_pos = addVec2pos(world_player_pos, amount);
+void GameEngine::Player::move_player(Vec2 amount, World& world) {
+    // update world position
+    worldpos = addVec2pos(worldpos, amount);
+
+    // recalc chunk + tile positions
+    chunkpos.x = static_cast<int>(worldpos.x) / world.tiles_per_chunk;
+    chunkpos.y = static_cast<int>(worldpos.y) / world.tiles_per_chunk;
+
+    tilepos.x = static_cast<int>(worldpos.x) % world.tiles_per_chunk;
+    tilepos.y = static_cast<int>(worldpos.y) % world.tiles_per_chunk;
+
+    // grab the tile directly (assuming you’ve got something like GetTileGlobal or GetTileAt)
+    isontile = world.GetTileGlobal(
+        static_cast<int>(worldpos.x),
+        static_cast<int>(worldpos.y)
+    );
+
+    
 }
+
 
 void GameEngine::Player::DrawPlayer() {
     Vec3 player_color = {1.0f, 0.0f, 0.0f}; // red
