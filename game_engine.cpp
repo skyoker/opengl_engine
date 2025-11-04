@@ -1,3 +1,4 @@
+
 #include "game_engine.hpp"
 #include <iostream>
 
@@ -90,8 +91,9 @@ void GameEngine::StartEngine() {
 
     Player player;
     player.engine = &engine;
+    player.world = &world;
     player.tilesize_on_screen = tilesize_on_screen;
-    player.world_player_pos = world.spawnpoint;
+    player.isontile = world.spawntile;
     player.player_pos_on_screen = {0.0f, 0.0f};
 
     Window window;
@@ -102,7 +104,8 @@ void GameEngine::StartEngine() {
     while (engine.isRunning()) {
         engine.beginFrame();
 
-        window.window_pos = subVec2pos(player.world_player_pos, 
+
+        window.window_pos = subVec2pos(player.worldpos, 
                                        Vec2{static_cast<float>(tiles_on_screenx), static_cast<float>(tiles_on_screeny)});
 
         window.chunks_in_win = window.chunks_in_window();

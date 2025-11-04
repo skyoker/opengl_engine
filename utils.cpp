@@ -30,3 +30,14 @@ Vec2 addVec2posy(const Vec2 pos, float tobeadded) {
 
     return new_pos;
 }
+
+Vec2 multiVec2pos(const Vec2 pos, float multiplier ) {
+    Vec2 new_pos{pos.x * multiplier, pos.y * multiplier};
+
+    return new_pos;
+}
+
+Vec2 getworldcords(Vec2 tilepos, Vec2 chunkpos, float tiles_per_chunk) {
+    return addVec2pos(multiVec2pos(chunkpos, tiles_per_chunk), tilepos);
+
+}

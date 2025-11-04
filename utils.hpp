@@ -47,5 +47,10 @@ const V* safeloc(const std::map<K, V>& map, const K& key) {
 
 Vec2 addVec2pos(const Vec2 pos1, const Vec2 pos2);
 Vec2 subVec2pos(const Vec2 pos1, const Vec2 pos2);
+Vec2 multiVec2pos(const Vec2 pos1, const Vec2 pos2, float multi);
+
 Vec2 addVec2posx(const Vec2 pos, float tobeadded);
 Vec2 addVec2posy(const Vec2 pos, float tobeadded);
+
+
+Vec2 getworldcords(Vec2 tilepos, Vec2 chunkpos, float tiles_per_chunk);

@@ -37,18 +37,20 @@ struct GameEngine {
     // --- PLAYER STRUCT ---
     struct Player {
         Engine2D* engine = nullptr;
+        World* world = nullptr;
+
         Vec2 tilesize_on_screen;
 
-        Vec2 world_player_pos;
+        Tile isontile;
         Vec2 player_pos_on_screen;
 
-        int chunkx = 0;
-        int chunky = 0;
-        int tilex = 0;
-        int tiley = 0;
+        Vec2 chunkpos = isontile.chunk_pos;
+        Vec2 tilepos = isontile.inside_chunk_pos;
+        Vec2 worldpos = getworldcords(tilepos, chunkpos, world.tiles_per_chunk);
 
         void move_player(Vec2 amount);
         void DrawPlayer();
+   
     };
 
     // --- ENGINE FUNCTIONS ---

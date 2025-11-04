@@ -118,7 +118,9 @@ void Testing::TestDrawTile() {
     World world("../world");
 
     // Make the GameEngine
-    GameEngine gameEngine(SCREEN_WIDTH, SCREEN_HEIGHT, world);
+    GameEngine gameEngine;
+    gameEngine.screen_width = SCREEN_WIDTH;
+    gameEngine.screen_height = SCREEN_HEIGHT;
 
     // Load one chunk for testing (like 0,0)
     Chunk chunk = world.LoadChunk(0, 0);

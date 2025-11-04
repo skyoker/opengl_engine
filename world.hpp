@@ -44,7 +44,6 @@ struct Chunks {
 
 
 struct World {
-    const Vec2 spawnpoint = {0, 0};
 
     fs::path path_to_world; 
 
@@ -57,7 +56,13 @@ struct World {
     int chunks_per_worldx;
     int chunks_per_worldy;
 
-    private:
+    Tile spawntile = GetTile(
+        tiles_per_chunk / 2,
+        tiles_per_chunk / 2,
+        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2)
+    );
+
+    private:    
     void get_info();
 
 };
