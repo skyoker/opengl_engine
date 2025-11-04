@@ -62,10 +62,31 @@ void Chunks::clear_chunks() {
     chunks.clear();
 }
 
-void Tiles::add_tile(const Tile& tile_to_be_added) {
+bool Chunks::contains(const Chunk& chunk) {
+    for (const auto& c : chunks) {
+        if (c.pos.x == chunk.pos.x && c.pos.y == chunk.pos.y)
+            return true;
+    }
+    return false;
+}
 
+void Chunks::remove(const Chunk& chunk) {
+    chunks.erase(
+        std::remove_if(
+            chunks.begin(),
+            chunks.end(),
+            [&](const Chunk& c) {
+                return c.pos.x == chunk.pos.x && c.pos.y == chunk.pos.y;
+            }),
+        chunks.end()
+    );
+}
+
+
+void Tiles::add_tile(const Tile& tile_to_be_added) {
     tiles.push_back(tile_to_be_added);
 }
+
 
 void Tiles::clear_tiles() {
     tiles.clear();
@@ -100,3 +121,4 @@ Tile World::GetTileGlobal(int world_x, int world_y) {
 
     return chunks[{chunk_x, chunk_y}].tiles.get_tile(tile_x, tile_y);
 }
+

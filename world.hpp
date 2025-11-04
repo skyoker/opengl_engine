@@ -38,6 +38,9 @@ struct Chunks {
 
     void add_chunk(Chunk& chunk_to_be_added);
     void clear_chunks();
+    bool contains(const Chunk& chunk);
+    void remove(const Chunk& chunk);
+
 };
 
 
