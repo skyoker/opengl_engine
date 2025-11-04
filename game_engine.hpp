@@ -46,7 +46,7 @@ struct GameEngine {
 
         Vec2 chunkpos = isontile.chunk_pos;
         Vec2 tilepos = isontile.inside_chunk_pos;
-        Vec2 worldpos = getworldcords(tilepos, chunkpos, world.tiles_per_chunk);
+        Vec2 worldpos = getworldcords(tilepos, chunkpos, world->tiles_per_chunk);
 
         void move_player(Vec2 amount);
         void DrawPlayer();
