@@ -5,20 +5,17 @@
 #include "engine.hpp"
 
 struct GameEngine {
-    int screen_width = 0;
-    int screen_height = 0;
-    int fps = 60;
+    int screen_width; // define this at start of game engine instance
+    int screen_height; // define this at start of game engine instance
+    int* fps = nullptr; // define this at start of game engine instance
 
-    const int tiles_on_screenx = 15;
-    const int tiles_on_screeny = 15;
+    int* tiles_on_screenx = nullptr; // define this at start of game engine instance    
+    int* tiles_on_screeny = nullptr; // define this at start of game engine instance  
 
-    Vec2 tilesize_on_screen = {
-        2.0f / static_cast<float>(tiles_on_screenx),
-        2.0f / static_cast<float>(tiles_on_screeny)
-    };
+    Vec2 tilesize_on_screen; // this will be calculated in init()
 
-    Engine2D* engine = nullptr; // manually set this later
-    World* world = nullptr;     // manually set this later
+    Engine2D* engine = nullptr; // define this at start of game engine instance
+    World* world = nullptr; // define this at start of game engine instance
 
     // --- WINDOW STRUCT ---
     struct Window {
@@ -57,5 +54,10 @@ struct GameEngine {
     void StartEngine(); 
     void DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine);
     void DrawWindow(const Window& window, Engine2D& engine, World& world);
+    
+    // -- INIT -- 
+    // to set calculated consts
+    void init();
+
 };
 

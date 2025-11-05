@@ -103,27 +103,28 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
 // --- MAIN LOOP ---
 
 void GameEngine::StartEngine() {
-    Engine2D engine(screen_width, screen_height);
-    World world("../world");
+    Engine2D engine(screen_width, screen_height); // first and only engine instance
+    World world("../world"); // first and only world instance
 
-    Player player;
-    player.engine = &engine;
-    player.world = &world;
+    Player player; // create player instance
+    player.engine = &engine; // set player pointer to init engine 
+    player.world = &world; // set player pointer to init world
+
     player.tilesize_on_screen = tilesize_on_screen;
     player.isontile = world.spawntile;
     player.player_pos_on_screen = {0.0f, 0.0f};
 
     Window window;
     window.world = &world;
-    window.window_sizex = tiles_on_screenx;
-    window.window_sizey = tiles_on_screeny;
+    window.window_sizex = *tiles_on_screenx;
+    window.window_sizey = *tiles_on_screeny;
 
     while (engine.isRunning()) {
         engine.beginFrame();
 
 
-        window.window_pos = subVec2pos(player.worldpos, 
-                                       Vec2{static_cast<float>(tiles_on_screenx), static_cast<float>(tiles_on_screeny)});
+        window.window_pos = subVec2pos(player.worldpos,
+                                       Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
 
         window.chunks_in_win = window.chunks_in_window();
         window.tiles_in_win = window.tiles_in_window();
@@ -147,4 +148,14 @@ void GameEngine::DrawWindow(const Window& window, Engine2D& engine, World& world
 
         DrawTile(tile_screen_pos, tile, engine);
     }
+}
+
+void GameEngine::init() {
+    tilesize_on_screen = {
+
+        2.0f / static_cast<float>(*tiles_on_screenx),
+        2.0f / static_cast<float>(*tiles_on_screeny)
+
+    };
+
 }

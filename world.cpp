@@ -87,6 +87,38 @@ void Tiles::add_tile(const Tile& tile_to_be_added) {
     tiles.push_back(tile_to_be_added);
 }
 
+void Tiles::remove(const Tile& tile) {
+    tiles.erase(
+        std::remove_if(
+            tiles.begin(),
+            tiles.end(),
+            [&](const Tile& t) {
+                return t.inside_chunk_pos.x == tile.inside_chunk_pos.x &&
+                       t.inside_chunk_pos.y == tile.inside_chunk_pos.y &&
+                       t.chunk_pos.x == tile.chunk_pos.x &&
+                       t.chunk_pos.y == tile.chunk_pos.y;
+            }),
+        tiles.end()
+    );
+}
+
+Tile Tiles::get_tile(int tilex, int tiley) {
+    for (const auto& t : tiles) {
+        if (t.inside_chunk_pos.x == tilex && t.inside_chunk_pos.y == tiley) {
+            return t;
+        }
+    }
+
+    std::cerr << "Tile not found at: " << tilex << "x " << tiley << "y\n";
+
+    // Return a default tile to avoid crash
+    Tile defaultTile;
+    defaultTile.type = TileType::Unknown;  // or whatever fits your system
+    defaultTile.inside_chunk_pos = {static_cast<float>(tilex), static_cast<float>(tiley)};
+    return defaultTile;
+}
+
+
 
 void Tiles::clear_tiles() {
     tiles.clear();
@@ -119,6 +151,11 @@ Tile World::GetTileGlobal(int world_x, int world_y) {
     int tile_x = world_x % tiles_per_chunk;
     int tile_y = world_y % tiles_per_chunk;
 
-    return chunks[{chunk_x, chunk_y}].tiles.get_tile(tile_x, tile_y);
+    // Make sure we have this chunk loaded (from cache or from file)
+    Chunk chunk = LoadChunk(chunk_x, chunk_y);
+
+    // Assuming your Tiles struct has a method to fetch a specific tile
+    return chunk.tiles.get_tile(tile_x, tile_y);
 }
+
 

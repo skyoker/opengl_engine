@@ -25,6 +25,8 @@ struct Tiles {
 
     void add_tile(const Tile& tile_to_be_added);
     void clear_tiles();
+    void remove(const Tile& tile);
+    Tile get_tile(int tilex, int tiley);
 };
 
 struct Chunk {

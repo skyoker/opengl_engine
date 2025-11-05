@@ -10,5 +10,6 @@ bool Cache::is_chunk_loaded(const Chunk& chunk) {
 }
 
 void Cache::remove_chunk_from_cache(const Chunk& chunk) {
-    loaded_chunks.remove_chunk(chunk);
+    loaded_chunks.remove(chunk);
+    
 }

@@ -24,6 +24,4 @@ struct Testing {
     void TestLoadChunk();
     void TestGetTile();
     void TestDrawTile();
-    void TestDrawWindow();
-
 };
