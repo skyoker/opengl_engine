@@ -1,7 +1,25 @@
 #include "world.hpp"
 #include "utils.hpp"
+#include "world.hpp"
+#include "cache.hpp"
+#include "utils.hpp"
 
 Chunk World::LoadChunk(int xpos, int ypos) {
+    // make a temp chunk struct to compare pos 
+
+    Chunk temp;
+    temp.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
+
+    // 1 heck if it’s already cached
+    if (cache->is_chunk_loaded(temp)) {
+        for (auto& cached_chunk : cache->loaded_chunks.chunks) {
+            if (cached_chunk.pos.x == temp.pos.x && cached_chunk.pos.y == temp.pos.y) {
+                return cached_chunk; // ✅ return cached version
+            }
+        }
+    }
+
+    // 2 load from file since it ain’t cached
     std::string chunkfilename = "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
     fs::path chunkpath = path_to_world / chunkfilename;
 
@@ -19,17 +37,19 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     chunk.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
     chunk.name = chunkfilename;
 
-    // convert JSON tiles into Tile structs
     for (auto& [tileKey, tileValue] : j.items()) {
         Tile tile;
         tile.inside_chunk_pos.x = tileValue.value("x", 0);
         tile.inside_chunk_pos.y = tileValue.value("y", 0);
         tile.chunk_pos = chunk.pos;
         tile.type = StringToTileType(tileValue.value("type", "null"));
-
         chunk.tiles.add_tile(tile);
     }
 
+    // 3 add to cache
+    cache->add_chunk_to_cache(chunk);
+
+    // 4 return the freshly loaded one
     return chunk;
 }
 
@@ -82,7 +102,6 @@ void Chunks::remove(const Chunk& chunk) {
     );
 }
 
-
 void Tiles::add_tile(const Tile& tile_to_be_added) {
     tiles.push_back(tile_to_be_added);
 }
@@ -117,8 +136,6 @@ Tile Tiles::get_tile(int tilex, int tiley) {
     defaultTile.inside_chunk_pos = {static_cast<float>(tilex), static_cast<float>(tiley)};
     return defaultTile;
 }
-
-
 
 void Tiles::clear_tiles() {
     tiles.clear();
@@ -158,4 +175,9 @@ Tile World::GetTileGlobal(int world_x, int world_y) {
     return chunk.tiles.get_tile(tile_x, tile_y);
 }
 
+void World::init() {
+    get_info();
+    Cache fresh_cache;
+    cache = &fresh_cache;
 
+}

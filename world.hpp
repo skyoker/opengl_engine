@@ -50,26 +50,27 @@ struct Chunks {
 
 struct World {
 
-    fs::path path_to_world; 
+    fs::path* path_to_world; // define this at first instance
+    Cache* cache; // this will be set in init()
 
-    World(const fs::path& Worldpath) : path_to_world(Worldpath) {get_info();}
 
     Chunk LoadChunk(int xpos, int ypos);
     Tile GetTile(int xpos, int ypos, const Chunk& chunk);
     Tile GetTileGlobal(int worldx, int worldy);
 
-    int tiles_per_chunk;
-    int chunks_per_worldx;
-    int chunks_per_worldy;
+    int tiles_per_chunk; // this will be set by init()
+    int chunks_per_worldx; // this will be set by init()
+    int chunks_per_worldy; // this will be set by init()
 
     Tile spawntile = GetTile(
         tiles_per_chunk / 2,
         tiles_per_chunk / 2,
-        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2)
+        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2, Cache* pChache)
     );
 
-    private:    
     void get_info();
+
+    void init();
 
 };
 

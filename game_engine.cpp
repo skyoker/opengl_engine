@@ -104,7 +104,9 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
 
 void GameEngine::StartEngine() {
     Engine2D engine(screen_width, screen_height); // first and only engine instance
-    World world("../world"); // first and only world instance
+    World world;
+    world.init();
+    // first and only world instance
 
     Player player; // create player instance
     player.engine = &engine; // set player pointer to init engine 
