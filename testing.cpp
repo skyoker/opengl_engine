@@ -64,7 +64,10 @@ void Testing::Testgenworld() {
 void Testing::TestLoadChunk() {
     fs::path path_to_world = "../world";
 
-    World world(path_to_world);
+    World world;
+    world.path_to_world = &path_to_world;
+    world.init();
+
     int xpos;
     int ypos;
 
@@ -89,7 +92,9 @@ void Testing::TestLoadChunk() {
 
 void Testing::TestGetTile() {
     fs::path path_to_world = "../world";
-    World world(path_to_world);
+    World world;
+    world.path_to_world = &path_to_world;
+    world.init();
     
     Chunk chunk;
     Tile tile;
@@ -115,7 +120,10 @@ void Testing::TestDrawTile() {
     Engine2D engine(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // World auto-loads its info now
-    World world("../world");
+    World world;
+    fs::path path_to_world = "../world";
+    world.path_to_world = &path_to_world;
+    world.init();
 
     // Make the GameEngine
     GameEngine gameEngine;

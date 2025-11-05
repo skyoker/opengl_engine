@@ -47,7 +47,8 @@ struct GameEngine {
 
         void move_player(Vec2 amount, World& world);
         void DrawPlayer();
-   
+
+        void init();
     };
 
     // --- ENGINE FUNCTIONS ---

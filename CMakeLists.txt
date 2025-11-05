@@ -12,6 +12,7 @@ set(SOURCES
     world.cpp
     utils.cpp
     game_engine.cpp
+    cache.cpp
 )
 
 # headers

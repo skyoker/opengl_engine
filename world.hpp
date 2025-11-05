@@ -20,6 +20,7 @@ struct Tile {
     TileType type;
 
 };
+
 struct Tiles {
     std::vector<Tile> tiles;
 
@@ -45,8 +46,7 @@ struct Chunks {
 
 };
 
-
-
+class Cache; // forward declaration becouse cache.hpp includes world.hpp which would cause a cyclic dependency
 
 struct World {
 
@@ -65,7 +65,7 @@ struct World {
     Tile spawntile = GetTile(
         tiles_per_chunk / 2,
         tiles_per_chunk / 2,
-        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2, Cache* pChache)
+        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2)
     );
 
     void get_info();

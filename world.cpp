@@ -14,14 +14,14 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     if (cache->is_chunk_loaded(temp)) {
         for (auto& cached_chunk : cache->loaded_chunks.chunks) {
             if (cached_chunk.pos.x == temp.pos.x && cached_chunk.pos.y == temp.pos.y) {
-                return cached_chunk; // ✅ return cached version
+                return cached_chunk; // return cached version
             }
         }
     }
 
     // 2 load from file since it ain’t cached
     std::string chunkfilename = "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
-    fs::path chunkpath = path_to_world / chunkfilename;
+    fs::path chunkpath = *path_to_world / chunkfilename;
 
     std::ifstream file(chunkpath);
     if (!file.is_open()) {
@@ -144,7 +144,7 @@ void Tiles::clear_tiles() {
 
 void World::get_info() {
     std::string filename = "world_info.json";
-    fs::path filepath = path_to_world / filename;
+    fs::path filepath = *path_to_world / filename;
     
     std::ifstream file(filepath);
     if (!file.is_open()) {

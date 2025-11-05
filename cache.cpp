@@ -7,6 +7,7 @@ void Cache::add_chunk_to_cache(Chunk& chunk) {
 
 bool Cache::is_chunk_loaded(const Chunk& chunk) {
     return loaded_chunks.contains(chunk);
+    
 }
 
 void Cache::remove_chunk_from_cache(const Chunk& chunk) {

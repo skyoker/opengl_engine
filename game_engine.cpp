@@ -41,6 +41,14 @@ void GameEngine::Player::DrawPlayer() {
     );
 }
 
+void GameEngine::Player::init() {
+    chunkpos = isontile.chunk_pos;
+        tilepos = isontile.inside_chunk_pos;
+        if (world) {
+            worldpos = getworldcords(tilepos, chunkpos, world->tiles_per_chunk);
+        }
+    }
+
 // --- WINDOW ---
 
 Chunks GameEngine::Window::chunks_in_window() {
@@ -103,38 +111,39 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
 // --- MAIN LOOP ---
 
 void GameEngine::StartEngine() {
-    Engine2D engine(screen_width, screen_height); // first and only engine instance
-    World world;
+    Engine2D engine(screen_width, screen_height);  // first and only engine instance
+    World world;  // first and only world instance
     world.init();
-    // first and only world instance
 
-    Player player; // create player instance
+   
+
+    Player player;  // created playe instance
     player.engine = &engine; // set player pointer to init engine 
-    player.world = &world; // set player pointer to init world
+    player.world = &world;
+    player.init(); // set player pointer to init world
 
     player.tilesize_on_screen = tilesize_on_screen;
     player.isontile = world.spawntile;
     player.player_pos_on_screen = {0.0f, 0.0f};
 
     Window window;
-    window.world = &world;
+    window.world = &world; 
     window.window_sizex = *tiles_on_screenx;
     window.window_sizey = *tiles_on_screeny;
 
     while (engine.isRunning()) {
         engine.beginFrame();
 
-
         window.window_pos = subVec2pos(player.worldpos,
                                        Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
 
-        window.chunks_in_win = window.chunks_in_window();
-        window.tiles_in_win = window.tiles_in_window();
+        window.chunks_in_win = window.chunks_in_window(); 
+        window.tiles_in_win = window.tiles_in_window(); 
 
-        DrawWindow(window, engine, world);
-        player.DrawPlayer();
+        DrawWindow(window, engine, world); 
+        player.DrawPlayer(); 
 
-        engine.endFrame();
+        engine.endFrame(); 
     }
 }
 
