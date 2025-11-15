@@ -5,20 +5,13 @@
 // --- PLAYER ---
 
 void GameEngine::Player::move_player(Vec2 amount, World& world) {
-    // update world position
-    worldpos = addVec2pos(worldpos, amount);
-
-    // recalc chunk + tile positions
-    chunkpos.x = static_cast<int>(worldpos.x) / world.tiles_per_chunk;
-    chunkpos.y = static_cast<int>(worldpos.y) / world.tiles_per_chunk;
-
-    tilepos.x = static_cast<int>(worldpos.x) % world.tiles_per_chunk;
-    tilepos.y = static_cast<int>(worldpos.y) % world.tiles_per_chunk;
+    int world_posx = static_cast<int>(getworldcords(isontile.inside_chunk_pos, isontile.chunk_pos, world.tiles_per_chunk).x); // number between 0, tiles_per_chunk*chunks_per_worldx (80)
+    int world_posy = static_cast<int>(getworldcords(isontile.inside_chunk_pos, isontile.chunk_pos, world.tiles_per_chunk).y); // number between 0, tiles_per_chunk*chunks_per_worldx (80)
 
     // grab the tile directly (assuming you’ve got something like GetTileGlobal or GetTileAt)
     isontile = world.GetTileGlobal(
-        static_cast<int>(worldpos.x),
-        static_cast<int>(worldpos.y)
+        static_cast<int>(world_posx),
+        static_cast<int>(world_posy)
     );
 
     
@@ -42,12 +35,15 @@ void GameEngine::Player::DrawPlayer() {
 }
 
 void GameEngine::Player::init() {
-    chunkpos = isontile.chunk_pos;
-        tilepos = isontile.inside_chunk_pos;
-        if (world) {
-            worldpos = getworldcords(tilepos, chunkpos, world->tiles_per_chunk);
-        }
-    }
+    tilesize_on_screen = {
+        2.0f / static_cast<float>(engine->width) * static_cast<float>(world->tiles_per_chunk),
+        2.0f / static_cast<float>(engine->height) * static_cast<float>(world->tiles_per_chunk)
+    };
+
+    isontile = world->spawntile;
+    player_pos_on_screen = {0.0f, 0.0f};
+
+}
 
 // --- WINDOW ---
 
@@ -111,20 +107,23 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
 // --- MAIN LOOP ---
 
 void GameEngine::StartEngine() {
+    fs::path path_world_on_disk = "../world";
+
+
     Engine2D engine(screen_width, screen_height);  // first and only engine instance
-    World world;  // first and only world instance
+    Cache cache; // first and only cache instance
+
+    World world; // first and only world instance
+    world.path_to_world = &path_world_on_disk;
+    world.cache = &cache;
     world.init();
 
-   
 
-    Player player;  // created playe instance
+    Player player;  // created player instance
     player.engine = &engine; // set player pointer to init engine 
     player.world = &world;
     player.init(); // set player pointer to init world
 
-    player.tilesize_on_screen = tilesize_on_screen;
-    player.isontile = world.spawntile;
-    player.player_pos_on_screen = {0.0f, 0.0f};
 
     Window window;
     window.world = &world; 
@@ -134,8 +133,11 @@ void GameEngine::StartEngine() {
     while (engine.isRunning()) {
         engine.beginFrame();
 
-        window.window_pos = subVec2pos(player.worldpos,
-                                       Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
+        window.window_pos = subVec2pos(Vec2{
+                                  getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world.tiles_per_chunk).x,
+                                  getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world.tiles_per_chunk).y},
+
+                                  Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
 
         window.chunks_in_win = window.chunks_in_window(); 
         window.tiles_in_win = window.tiles_in_window(); 
@@ -162,11 +164,13 @@ void GameEngine::DrawWindow(const Window& window, Engine2D& engine, World& world
 }
 
 void GameEngine::init() {
-    tilesize_on_screen = {
+    if (!tiles_on_screenx || !tiles_on_screeny) {
+        std::cerr << "tiles_on_screen pointers not set!\n";
+        return;
+    }
 
+    tilesize_on_screen = {
         2.0f / static_cast<float>(*tiles_on_screenx),
         2.0f / static_cast<float>(*tiles_on_screeny)
-
     };
-
 }

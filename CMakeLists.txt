@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
+
 project(Engine2D)
+
 set(CMAKE_CXX_STANDARD 17)
 
 # sources
@@ -32,6 +34,7 @@ find_package(GLEW REQUIRED)
 # executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+set(CMAKE_BUILD_TYPE Debug)
 # link libraries
 target_link_libraries(${PROJECT_NAME}
     ${OPENGL_LIBRARIES}

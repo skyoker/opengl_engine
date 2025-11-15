@@ -33,17 +33,13 @@ struct GameEngine {
 
     // --- PLAYER STRUCT ---
     struct Player {
-        Engine2D* engine = nullptr;
-        World* world = nullptr;
+        Engine2D* engine = nullptr; // define this at first instance
+        World* world = nullptr; // define this at first instance
 
-        Vec2 tilesize_on_screen;
 
-        Tile isontile;
-        Vec2 player_pos_on_screen;
-
-        Vec2 chunkpos = isontile.chunk_pos;
-        Vec2 tilepos = isontile.inside_chunk_pos;
-        Vec2 worldpos = getworldcords(tilepos, chunkpos, world->tiles_per_chunk);
+        Vec2 tilesize_on_screen; // defined in init() --usage for drawing player
+        Tile isontile; // defined in init() --usage for drawing player and for movement
+        Vec2 player_pos_on_screen; // defined in init() --usage for drawing player
 
         void move_player(Vec2 amount, World& world);
         void DrawPlayer();

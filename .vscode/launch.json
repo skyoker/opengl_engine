@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Existing Binary",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/home/skyoker/Documents/CODE/opengl/build/Engine2D",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "/home/skyoker/Documents/CODE/opengl",
+      "MIMode": "gdb",
+      "externalConsole": false
+    }
+  ]
+}

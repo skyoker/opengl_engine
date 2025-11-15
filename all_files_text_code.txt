@@ -1,0 +1,1148 @@
+========== [ START OF main.cpp ] ==========
+#include "game_engine.hpp"
+#include "gen_world.hpp"
+
+int main() {
+    // Initialize the game world
+    int FPS = 60;
+    int TILES_ON_SCREEN_X = 15;
+    int TILES_ON_SCREEN_Y = 15;
+
+    GenWorld genworld; // does not require init params
+    genworld.generate_world(); // generates the game world on disk 
+
+    GameEngine gameengine;
+    gameengine.screen_width = 1000;
+    gameengine.screen_height = 1000;
+    gameengine.fps = &FPS;
+    gameengine.tiles_on_screenx = &TILES_ON_SCREEN_X;
+    gameengine.tiles_on_screeny = &TILES_ON_SCREEN_Y;
+
+    gameengine.StartEngine();
+
+    return 0;
+}
+========== [ END OF main.cpp ] ==========
+
+========== [ START OF engine.cpp ] ==========
+#include <cmath>
+#include <iostream>
+
+#include "engine.hpp"
+/*
+for wayland DE to work you have to add the following lines to bashrc or zshrc;
+
+windowrulev2 = float,class:^engine2d$
+windowrulev2 = size 1000 1000,class:^engine2d$
+windowrulev2 = center,class:^engine2d$
+
+replace engine2d with the title one put under
+replace the size to desired size everything will 
+be vectorized anyway
+*/
+
+
+
+
+
+
+// shaders
+
+// vertex shader
+static const char* vertexShaderSrc = R"( 
+#version 330 core
+layout(location = 0) in vec2 aPos;
+uniform vec3 uColor;
+out vec3 vColor;
+void main() {
+    vColor = uColor;
+    gl_Position = vec4(aPos, 0.0, 1.0);
+}
+)";
+
+// runs ones per pixel inside the shape
+static const char* fragmentShaderSrc = R"(
+#version 330 core
+in vec3 vColor;
+out vec4 FragColor;
+void main() {
+    FragColor = vec4(vColor, 1.0);
+}
+)";
+
+// constructor
+Engine2D::Engine2D(int w, int h, const char* title)
+    : width(w), height(h) {
+
+    if (!glfwInit()) { std::cerr << "GLFW init failed\n"; exit(EXIT_FAILURE); }
+
+    glfwWindowHintString(GLFW_WAYLAND_APP_ID, "engine2d"); // only on wayland or hyperland
+
+    window = glfwCreateWindow(width, height, title, NULL, NULL); // creates window obj
+    if (!window) { std::cerr << "Failed to create GLFW window\n"; glfwTerminate(); exit(EXIT_FAILURE); }
+
+    glfwMakeContextCurrent(window); // set context 
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { std::cerr << "GLEW init failed\n"; glfwTerminate(); exit(EXIT_FAILURE); }
+
+    glViewport(0, 0, width, height);
+
+    shaderProgram = createShaderProgram();
+
+    // persistent VAO + VBO for triangles
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6, nullptr, GL_DYNAMIC_DRAW); // 3 vertices * 2 floats
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+// destructor
+Engine2D::~Engine2D() {
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteProgram(shaderProgram);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+// frame control
+bool Engine2D::isRunning() { return !glfwWindowShouldClose(window); }
+void Engine2D::beginFrame() { glClearColor(0.1f, 0.1f, 0.12f, 1.0f); glClear(GL_COLOR_BUFFER_BIT); }
+void Engine2D::endFrame() { glfwSwapBuffers(window); glfwPollEvents(); }
+
+// fast triangle draw
+
+void Engine2D::drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const Vec3& color) {
+    float vertices[] = { a.x, a.y, b.x, b.y, c.x, c.y };
+
+    glUseProgram(shaderProgram);
+    GLint colorLoc = glGetUniformLocation(shaderProgram, "uColor");
+    glUniform3f(colorLoc, color.r, color.g, color.b);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // update existing buffer
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void Engine2D::drawRect(float width, float height, const Vec3& color, const Vec2& blpos) {
+    // bottom-left (given)
+    Vec2 bl = blpos;
+    // bottom-right
+    Vec2 br = { blpos.x + width, blpos.y };
+    // top-left
+    Vec2 tl = { blpos.x, blpos.y + height };
+    // top-right
+    Vec2 tr = { blpos.x + width, blpos.y + height };
+
+    // 2 triangles forming the rectangle
+    drawTriangle(tl, bl, tr, color);
+    drawTriangle(br, tr, bl, color);
+}
+
+void Engine2D::drawCircle(float radius, const Vec2& center, int points, Vec3 color) {
+    const double radians_per_triangle = (2.0 * PI) / points; // full circle / # of slices
+
+
+    for (int i = 0; i < points; i++) {
+        // two points on the circle’s edge
+        Vec2 p2 = {center.x + radius * static_cast<float>(cos(i * radians_per_triangle)),
+                   center.y + radius * static_cast<float>(sin(i * radians_per_triangle))};
+        Vec2 p3 = {center.x + radius * static_cast<float>(cos((i + 1) * radians_per_triangle)),
+                   center.y + radius * static_cast<float>(sin((i + 1) * radians_per_triangle))};
+
+        drawTriangle(center, p2, p3, color);
+    }
+}
+
+// shader creation
+GLuint Engine2D::createShaderProgram() {
+
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs, 1, &vertexShaderSrc, nullptr);
+    glCompileShader(vs);
+
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, &fragmentShaderSrc, nullptr);
+    glCompileShader(fs);
+
+    GLuint prog = glCreateProgram();
+    glAttachShader(prog, vs);
+    glAttachShader(prog, fs);
+    glLinkProgram(prog);
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return prog;
+}
+
+// Utils
+
+========== [ END OF engine.cpp ] ==========
+
+========== [ START OF testing.cpp ] ==========
+#include "testing.hpp"
+
+Testing::Testing() {}
+
+
+void Testing::Testdrawtriangle() {
+        Engine2D engine(SCREEN_WIDTH, SCREEN_HEIGHT);
+        while (engine.isRunning()) {
+            engine.beginFrame();
+
+            // draw a red triangle
+            Vec2 a{ -0.5f, -0.5f };
+            Vec2 b{  0.5f, -0.5f };
+            Vec2 c{  0.0f,  0.5f };
+
+            Vec3 red{ 1.0f, 0.0f, 0.0f };
+
+            engine.drawTriangle(a, b, c, red);
+
+            engine.endFrame();
+    }
+
+    }
+
+void Testing::Testdrawrect() {
+    Engine2D engine(SCREEN_WIDTH, SCREEN_HEIGHT); 
+    while (engine.isRunning()) {
+            engine.beginFrame();
+
+            Vec2 pos = {0.0f, 0.0f}; // middle
+
+            Vec3 red{ 1.0f, 0.0f, 0.0f }; // red
+
+            engine.drawRect(0.5f, 0.5f, red, pos);
+
+            engine.endFrame();
+    }
+}
+
+void Testing::Testdrawcircle() {
+    Engine2D engine(SCREEN_WIDTH, SCREEN_HEIGHT); 
+    while (engine.isRunning()) {
+            engine.beginFrame();
+
+            Vec2 pos = {0.0f, 0.0f}; // middle
+
+            Vec3 red{ 1.0f, 0.0f, 0.0f }; // red
+
+            float radius = 0.6f;
+            int points = 4;
+
+            engine.drawCircle(radius, pos, points, red);
+
+            engine.endFrame();
+    }
+
+}
+
+void Testing::Testgenworld() {
+    GenWorld genworld;
+    genworld.generate_world();
+}
+
+void Testing::TestLoadChunk() {
+    fs::path path_to_world = "../world";
+
+    World world;
+    world.path_to_world = &path_to_world;
+    world.init();
+
+    int xpos;
+    int ypos;
+
+    // 8 tiles per chunk
+    // 100 chunks per world
+    // 10 chunks per axis
+    Chunk chunk;
+
+    for (int x = 0; x < 10; x++) {
+        for (int y = 0; y < 10; y++) {
+            xpos = x;
+            ypos = y;
+            chunk = world.LoadChunk(xpos, ypos);
+
+            std::cout << "Chunk: " << chunk.name << " at pos " << chunk.pos.x << " and " << chunk.pos.y << "\n";
+
+        }
+
+    }
+    
+}
+
+void Testing::TestGetTile() {
+    fs::path path_to_world = "../world";
+    World world;
+    world.path_to_world = &path_to_world;
+    world.init();
+    
+    Chunk chunk;
+    Tile tile;
+
+    chunk = world.LoadChunk(0, 0);
+    // 8 tiles per chunk
+    // 100 chunks per world
+    // 10 chunks per axis
+
+    for (int x = 0; x < 8; x++) {
+        for (int y = 0; y < 8; y++) {
+            tile = world.GetTile(x, y, chunk);
+
+            std::cout << "Tile: " << tile.inside_chunk_pos.x << "x " << tile.inside_chunk_pos.y << "y is type " << TileTypeToString(tile.type) << "\n";
+
+        }
+
+    }
+
+}
+
+void Testing::TestDrawTile() {
+    Engine2D engine(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    // World auto-loads its info now
+    World world;
+    fs::path path_to_world = "../world";
+    world.path_to_world = &path_to_world;
+    world.init();
+
+    // Make the GameEngine
+    GameEngine gameEngine;
+    gameEngine.screen_width = SCREEN_WIDTH;
+    gameEngine.screen_height = SCREEN_HEIGHT;
+
+    // Load one chunk for testing (like 0,0)
+    Chunk chunk = world.LoadChunk(0, 0);
+
+    // Main loop
+    while (engine.isRunning()) {
+        engine.beginFrame();
+
+        for (const auto& tile : chunk.tiles.tiles) {
+            Vec2 screenPos = {-1.0f, 0.0f};
+            gameEngine.DrawTile(screenPos, tile, engine);
+        }
+
+        engine.endFrame();
+    }
+}
+========== [ END OF testing.cpp ] ==========
+
+========== [ START OF gen_world.cpp ] ==========
+#include "gen_world.hpp"
+
+void GenWorld::make_world_folder() {
+
+    if (fs::exists(FOLDER_PATH)) {
+        // Remove existing folder and all its contents
+        fs::remove_all(FOLDER_PATH);
+
+    }
+
+    // Create folder
+    fs::create_directory(FOLDER_PATH);
+}
+
+
+void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
+    std::string file_name = "ch" + std::to_string(chunk_x) + "x" + std::to_string(chunk_y) + "y.json";
+    fs::path file_path = FOLDER_PATH / file_name;
+
+    std::ofstream chunk_file(file_path); // Create and open the file
+    if (!chunk_file.is_open()) {
+        std::cerr << "Failed to create chunk file: " << file_path << "\n";
+        return;
+    }
+
+    chunk_file << "{\n";
+    for (int tile_x = 0; tile_x < TILES_PER_CHUNK; ++tile_x) {
+        for (int tile_y = 0; tile_y < TILES_PER_CHUNK; ++tile_y) {
+            chunk_file << "    \"t" << tile_x << "x" << tile_y << "y\": {\"type\": \"NULL\"}";
+            if (!(tile_x == TILES_PER_CHUNK - 1 && tile_y == TILES_PER_CHUNK - 1)) {
+                chunk_file << ",";
+            }
+            chunk_file << "\n";
+        }
+    }
+    chunk_file << "}\n";
+    chunk_file.close();
+
+}
+
+void GenWorld::create_meta_file(int tiles_per_chunk, int chunks_per_worldx, int chunks_per_worldy) {
+    std::string filename = "world_info.json";
+    fs::path file_path = FOLDER_PATH / filename;
+
+    std::ofstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to create meta file: " << file_path << "\n";
+        return;
+    }
+
+    file << "{\n";
+    file << "    \"tiles_per_chunk\": " << tiles_per_chunk << ",\n";
+    file << "    \"chunks_per_worldx\": " << chunks_per_worldx << ",\n";
+    file << "    \"chunks_per_worldy\": " << chunks_per_worldy << "\n";
+    file << "}\n";
+
+    file.close();
+}
+void GenWorld::generate_world() {
+    make_world_folder();
+    create_meta_file(TILES_PER_CHUNK, CHUNKS_PER_WORLDX, CHUNKS_PER_WORLDY);
+
+    for (int chunk_x = 0; chunk_x < CHUNKS_PER_WORLDX; ++chunk_x) {
+        for (int chunk_y = 0; chunk_y < CHUNKS_PER_WORLDY; ++chunk_y) {
+            create_chunk_file(chunk_x, chunk_y);
+        }
+    }
+
+}
+
+========== [ END OF gen_world.cpp ] ==========
+
+========== [ START OF world.cpp ] ==========
+#include "world.hpp"
+#include "utils.hpp"
+#include "world.hpp"
+#include "cache.hpp"
+#include "utils.hpp"
+
+Chunk World::LoadChunk(int xpos, int ypos) {
+    // make a temp chunk struct to compare pos 
+
+    Chunk temp;
+    temp.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
+
+    // 1 heck if it’s already cached
+    if (cache.is_chunk_loaded(temp)) {
+        for (auto& cached_chunk : cache.loaded_chunks.chunks) {
+            if (cached_chunk.pos.x == temp.pos.x && cached_chunk.pos.y == temp.pos.y) {
+                return cached_chunk; // return cached version
+            }
+        }
+    }
+
+    // 2 load from file since it ain’t cached
+    std::string chunkfilename = "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
+    fs::path chunkpath = *path_to_world / chunkfilename;
+
+    std::ifstream file(chunkpath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open chunk: " << chunkpath << "\n";
+        return {};
+    }
+
+    json j;
+    file >> j;
+    file.close();
+
+    Chunk chunk;
+    chunk.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
+    chunk.name = chunkfilename;
+
+    for (auto& [tileKey, tileValue] : j.items()) {
+        Tile tile;
+        tile.inside_chunk_pos.x = tileValue.value("x", 0);
+        tile.inside_chunk_pos.y = tileValue.value("y", 0);
+        tile.chunk_pos = chunk.pos;
+        tile.type = StringToTileType(tileValue.value("type", "null"));
+        chunk.tiles.add_tile(tile);
+    }
+
+    // 3 add to cache
+    cache.add_chunk_to_cache(chunk);
+
+    // 4 return the freshly loaded one
+    return chunk;
+}
+
+Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
+    Tile tile;
+    tile.inside_chunk_pos.x = xpos;
+    tile.inside_chunk_pos.y = ypos;
+    tile.chunk_pos = chunk.pos;
+    
+    // Find the matching tile in the chunk
+    for (const auto& t : chunk.tiles.tiles) {
+        if (t.inside_chunk_pos.x == xpos && t.inside_chunk_pos.y == ypos) {
+            return t;
+        }
+    }
+    
+    // If no tile found, return unknown type
+    tile.type = TileType::Unknown;
+    return tile;
+}
+
+void World::get_info() {
+    std::string filename = "world_info.json";
+    fs::path filepath = *path_to_world / filename;
+    
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open world info: " << filepath << "\n";
+        return; // return empty/default
+    }
+
+    json j;
+    file >> j;
+    file.close();
+
+    tiles_per_chunk   = j.value("tiles_per_chunk", 0);
+    chunks_per_worldx = j.value("chunks_per_worldx", 0);
+    chunks_per_worldy = j.value("chunks_per_worldy", 0);
+
+}
+
+Tile World::GetTileGlobal(int world_x, int world_y) {
+    int chunk_x = world_x / tiles_per_chunk;
+    int chunk_y = world_y / tiles_per_chunk;
+    int tile_x = world_x % tiles_per_chunk;
+    int tile_y = world_y % tiles_per_chunk;
+
+    // Make sure we have this chunk loaded (from cache or from file)
+    Chunk chunk = LoadChunk(chunk_x, chunk_y);
+
+    // Assuming your Tiles struct has a method to fetch a specific tile
+    return chunk.tiles.get_tile(tile_x, tile_y);
+}
+
+void World::init() {
+    get_info();
+    spawntile = GetTile(
+        tiles_per_chunk / 2,
+        tiles_per_chunk / 2,
+        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2)
+    );
+
+}========== [ END OF world.cpp ] ==========
+
+========== [ START OF utils.cpp ] ==========
+#include "utils.hpp"
+
+Vec2 addVec2pos(const Vec2 pos1, const Vec2 pos2) {
+    float newx = pos1.x + pos2.x;
+    float newy = pos1.y + pos2.y;
+
+    Vec2 new_pos = { newx, newy};
+
+
+    return new_pos;
+}
+
+Vec2 subVec2pos(const Vec2 pos1, const Vec2 pos2) {
+    float newx = pos1.x - pos2.x;
+    float newy = pos1.y - pos2.y;
+
+    Vec2 new_pos = {newx, newy};
+
+
+    return new_pos;
+}
+
+Vec2 addVec2posx(const Vec2 pos, float tobeadded) {
+    Vec2 new_pos{pos.x + tobeadded, pos.y};
+
+    return {pos.x + tobeadded, pos.y};
+}
+
+Vec2 addVec2posy(const Vec2 pos, float tobeadded) {
+    Vec2 new_pos{pos.x, pos.y + tobeadded};
+
+    return new_pos;
+}
+
+Vec2 multiVec2pos(const Vec2 pos, float multiplier ) {
+    Vec2 new_pos{pos.x * multiplier, pos.y * multiplier};
+
+    return new_pos;
+}
+
+Vec2 getworldcords(Vec2 tilepos, Vec2 chunkpos, float tiles_per_chunk) {
+
+    return addVec2pos(multiVec2pos(chunkpos, tiles_per_chunk), tilepos);
+
+}
+
+void Chunks::add_chunk(Chunk& chunk_to_be_added) {
+
+    chunks.push_back(chunk_to_be_added);
+}
+
+void Chunks::clear_chunks() {
+
+
+    chunks.clear();
+}
+
+bool Chunks::contains(const Chunk& chunk) {
+    for (const auto& c : chunks) {
+        if (c.pos.x == chunk.pos.x && c.pos.y == chunk.pos.y)
+            return true;
+    }
+    return false;
+}
+
+void Chunks::remove(const Chunk& chunk) {
+    chunks.erase(
+        std::remove_if(
+            chunks.begin(),
+            chunks.end(),
+            [&](const Chunk& c) {
+                return c.pos.x == chunk.pos.x && c.pos.y == chunk.pos.y;
+            }),
+        chunks.end()
+    );
+}
+
+void Tiles::add_tile(const Tile& tile_to_be_added) {
+    tiles.push_back(tile_to_be_added);
+}
+
+void Tiles::remove(const Tile& tile) {
+    tiles.erase(
+        std::remove_if(
+            tiles.begin(),
+            tiles.end(),
+            [&](const Tile& t) {
+                return t.inside_chunk_pos.x == tile.inside_chunk_pos.x &&
+                       t.inside_chunk_pos.y == tile.inside_chunk_pos.y &&
+                       t.chunk_pos.x == tile.chunk_pos.x &&
+                       t.chunk_pos.y == tile.chunk_pos.y;
+            }),
+        tiles.end()
+    );
+}
+
+Tile Tiles::get_tile(int tilex, int tiley) {
+    for (const auto& t : tiles) {
+        if (t.inside_chunk_pos.x == tilex && t.inside_chunk_pos.y == tiley) {
+            return t;
+        }
+    }
+
+    std::cerr << "Tile not found at: " << tilex << "x " << tiley << "y\n";
+
+    // Return a default tile to avoid crash
+    Tile defaultTile;
+    defaultTile.type = TileType::Unknown;  // or whatever fits your system
+    defaultTile.inside_chunk_pos = {static_cast<float>(tilex), static_cast<float>(tiley)};
+    return defaultTile;
+}
+
+void Tiles::clear_tiles() {
+    tiles.clear();
+
+}========== [ END OF utils.cpp ] ==========
+
+========== [ START OF game_engine.cpp ] ==========
+
+#include "game_engine.hpp"
+#include <iostream>
+
+// --- PLAYER ---
+
+void GameEngine::Player::move_player(Vec2 amount, World& world) {
+    // update world position
+    worldpos = addVec2pos(worldpos, amount);
+
+    // recalc chunk + tile positions
+    chunkpos.x = static_cast<int>(worldpos.x) / world.tiles_per_chunk;
+    chunkpos.y = static_cast<int>(worldpos.y) / world.tiles_per_chunk;
+
+    tilepos.x = static_cast<int>(worldpos.x) % world.tiles_per_chunk;
+    tilepos.y = static_cast<int>(worldpos.y) % world.tiles_per_chunk;
+
+    // grab the tile directly (assuming you’ve got something like GetTileGlobal or GetTileAt)
+    isontile = world.GetTileGlobal(
+        static_cast<int>(worldpos.x),
+        static_cast<int>(worldpos.y)
+    );
+
+    
+}
+
+
+void GameEngine::Player::DrawPlayer() {
+    Vec3 player_color = {1.0f, 0.0f, 0.0f}; // red
+
+    if (!engine || !engine->isRunning()) {
+        std::cerr << "Engine not running, cannot draw player\n";
+        return;
+    }
+
+    engine->drawRect(
+        tilesize_on_screen.x,
+        tilesize_on_screen.y,
+        player_color,
+        player_pos_on_screen
+    );
+}
+
+void GameEngine::Player::init() {
+    tilesize_on_screen = {
+        2.0f / static_cast<float>(engine->width) * static_cast<float>(world->tiles_per_chunk),
+        2.0f / static_cast<float>(engine->height) * static_cast<float>(world->tiles_per_chunk)
+    };
+
+    isontile = world->spawntile;
+    player_pos_on_screen = {0.0f, 0.0f};
+    chunkpos = isontile.chunk_pos;
+    tilepos = isontile.inside_chunk_pos;
+    worldpos = getworldcords(tilepos, chunkpos, world->tiles_per_chunk);
+
+}
+
+// --- WINDOW ---
+
+Chunks GameEngine::Window::chunks_in_window() {
+    int win_startx = static_cast<int>(window_pos.x);
+    int win_starty = static_cast<int>(window_pos.y);
+    int win_endx = win_startx + window_sizex;
+    int win_endy = win_starty + window_sizey;
+
+    Chunks chunks_in_win;
+
+    if (!world) return chunks_in_win;
+
+    for (int cx = win_startx / (world->tiles_per_chunk * window_sizex);
+         cx <= win_endx / (world->tiles_per_chunk * window_sizex); cx++) {
+        for (int cy = win_starty / (world->tiles_per_chunk * window_sizey);
+             cy <= win_endy / (world->tiles_per_chunk * window_sizey); cy++) {
+
+            Chunk chunk = world->LoadChunk(cx, cy);
+            chunks_in_win.add_chunk(chunk);
+        }
+    }
+
+    return chunks_in_win;
+}
+
+Tiles GameEngine::Window::tiles_in_window() {
+    Tiles tiles_in_win;
+
+    for (const auto& chunk : chunks_in_win.chunks) {
+        for (const auto& tile : chunk.tiles.tiles) {
+            tiles_in_win.add_tile(tile);
+        }
+    }
+
+    return tiles_in_win;
+}
+
+// --- DRAWING ---
+
+void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
+    if (!engine.isRunning()) {
+        std::cerr << "Engine is not running, cannot draw to screen.\n";
+        return;
+    }
+
+    Vec3 white = {1.0f, 1.0f, 1.0f};
+
+    switch (tile.type) {
+        case TileType::Null:
+            engine.drawRect(tilesize_on_screen.x, tilesize_on_screen.y, white, pos);
+            break;
+        case TileType::Wall:
+        case TileType::Rock:
+        case TileType::Unknown:
+            // TODO: draw other tile types
+            break;
+    }
+}
+
+// --- MAIN LOOP ---
+
+void GameEngine::StartEngine() {
+    fs::path path_world_on_disk = "../world";
+
+
+    Engine2D engine(screen_width, screen_height);  // first and only engine instance
+    World world;
+    world.path_to_world = &path_world_on_disk;  // first and only world instance
+    world.init();
+
+
+    Player player;  // created player instance
+    player.engine = &engine; // set player pointer to init engine 
+    player.world = &world;
+    player.init(); // set player pointer to init world
+
+    player.tilesize_on_screen = tilesize_on_screen;
+    player.isontile = world.spawntile;
+    player.player_pos_on_screen = {0.0f, 0.0f};
+
+    Window window;
+    window.world = &world; 
+    window.window_sizex = *tiles_on_screenx;
+    window.window_sizey = *tiles_on_screeny;
+
+    while (engine.isRunning()) {
+        engine.beginFrame();
+
+        window.window_pos = subVec2pos(player.worldpos,
+                                       Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
+
+        window.chunks_in_win = window.chunks_in_window(); 
+        window.tiles_in_win = window.tiles_in_window(); 
+
+        DrawWindow(window, engine, world); 
+        player.DrawPlayer(); 
+
+        engine.endFrame(); 
+    }
+}
+
+void GameEngine::DrawWindow(const Window& window, Engine2D& engine, World& world) {
+    for (const auto& tile : window.tiles_in_win.tiles) {
+        int world_x = static_cast<int>(tile.chunk_pos.x) * world.tiles_per_chunk + tile.inside_chunk_pos.x;
+        int world_y = static_cast<int>(tile.chunk_pos.y) * world.tiles_per_chunk + tile.inside_chunk_pos.y;
+
+        Vec2 tile_screen_pos = {
+            (world_x - window.window_pos.x) * tilesize_on_screen.x,
+            (world_y - window.window_pos.y) * tilesize_on_screen.y
+        };
+
+        DrawTile(tile_screen_pos, tile, engine);
+    }
+}
+
+void GameEngine::init() {
+    tilesize_on_screen = {
+
+        2.0f / static_cast<float>(*tiles_on_screenx),
+        2.0f / static_cast<float>(*tiles_on_screeny)
+
+    };
+
+}========== [ END OF game_engine.cpp ] ==========
+
+========== [ START OF cache.cpp ] ==========
+#include "cache.hpp"
+
+
+void Cache::add_chunk_to_cache(Chunk& chunk) {
+    loaded_chunks.add_chunk(chunk);
+}
+
+bool Cache::is_chunk_loaded(const Chunk& chunk) {
+    return loaded_chunks.contains(chunk);
+}
+
+void Cache::remove_chunk_from_cache(const Chunk& chunk) {
+    loaded_chunks.remove(chunk);
+    
+}========== [ END OF cache.cpp ] ==========
+
+========== [ START OF engine.hpp ] ==========
+#pragma once
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
+
+#include "utils.hpp"
+
+#define PI 3.14159653589738
+ 
+enum class DE { Unknown, Hyprland, Sway, GNOME, KDE, XFCE };
+
+struct Engine2D {
+    Engine2D(int w = 800, int h = 600, const char* title = "2D Engine");
+    ~Engine2D();
+
+    bool isRunning();
+    void beginFrame();
+    void endFrame();
+
+    // Fast drawing
+    void drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const Vec3& color);
+    void drawRect(const float width, const float height, const Vec3& color, const Vec2& tlpos);
+    void drawCircle(float radius, const Vec2& center, int points, Vec3 color);
+
+
+
+
+private:
+    GLFWwindow* window;
+    GLuint shaderProgram;
+    GLuint VAO, VBO;
+
+    int width, height;
+
+    GLuint createShaderProgram();
+};  
+
+========== [ END OF engine.hpp ] ==========
+
+========== [ START OF testing.hpp ] ==========
+#pragma once
+#include <iostream>
+
+    
+#include "engine.hpp"
+#include "gen_world.hpp"
+#include "world.hpp"
+#include "utils.hpp"
+#include "game_engine.hpp"
+
+
+
+#define SCREEN_HEIGHT 1000  // 1000 is set in bash so keep
+#define SCREEN_WIDTH 1000  // 1000 is set in bash so keep
+
+
+struct Testing {
+
+    Testing();
+    void Testdrawtriangle();
+    void Testdrawrect();
+    void Testdrawcircle();
+    void Testgenworld();
+    void TestLoadChunk();
+    void TestGetTile();
+    void TestDrawTile();
+};
+========== [ END OF testing.hpp ] ==========
+
+========== [ START OF gen_world.hpp ] ==========
+#pragma once
+
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+
+namespace fs = std::filesystem;
+
+struct GenWorld {
+    const int TILES_PER_CHUNK = 8;
+    const int CHUNKS_PER_WORLDX = 10;
+    const int CHUNKS_PER_WORLDY = 10;
+
+    const fs::path FOLDER_PATH = "../world";
+
+    void make_world_folder();
+    void create_chunk_file(int chunk_x, int chunk_y);
+    void create_meta_file(int tiles_per_chunk, int chunks_per_worldx, int chunks_per_worldy);
+    void generate_world();
+};
+
+========== [ END OF gen_world.hpp ] ==========
+
+========== [ START OF world.hpp ] ==========
+#pragma once
+
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <string>
+#include <nlohmann/json.hpp>
+#include <iostream>
+#include <vector>
+
+#include "utils.hpp"
+#include "cache.hpp"
+
+using json = nlohmann::json;
+
+namespace fs = std::filesystem;
+
+
+struct World {
+    Cache cache;
+
+    fs::path* path_to_world; // define this at first instance
+
+
+    Chunk LoadChunk(int xpos, int ypos);
+    Tile GetTile(int xpos, int ypos, const Chunk& chunk);
+    Tile GetTileGlobal(int worldx, int worldy);
+
+    int tiles_per_chunk; // this will be set by init()
+    int chunks_per_worldx; // this will be set by init()
+    int chunks_per_worldy; // this will be set by init()
+
+    Tile spawntile;
+
+    void get_info();
+
+    void init();
+
+};
+
+========== [ END OF world.hpp ] ==========
+
+========== [ START OF utils.hpp ] ==========
+#pragma once
+
+#include <iostream>
+#include <map>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+
+
+
+
+struct Vec2 { float x, y; };
+struct Vec3 { float r, g, b; };
+
+enum class TileType {
+    Null,
+    Rock,
+    Wall,
+    Unknown
+};
+
+inline TileType StringToTileType(const std::string& str) {
+    if (str == "rock") return TileType::Rock;
+    if (str == "water") return TileType::Wall;
+    if (str == "NULL")  return TileType::Null;
+
+    std::cerr << "no tiletype detected: " << '\n';
+    return TileType::Unknown;
+}
+
+inline std::string TileTypeToString(TileType type) {
+    switch (type) {
+        case TileType::Rock: return "rock";
+        case TileType::Wall: return "wall";
+        case TileType::Null: return "null";
+        default: return "unknown";
+    }
+}
+
+
+
+template<typename K, typename V>
+const V* safeloc(const std::map<K, V>& map, const K& key) {
+    auto it = map.find(key);
+    if (it != map.end())
+        return &it->second;
+
+    std::cerr << "Missing key: " << key << '\n';
+    return nullptr;
+}
+
+struct Tile {
+    Vec2 inside_chunk_pos;
+    Vec2 chunk_pos;
+    TileType type;
+
+};
+
+struct Tiles {
+    std::vector<Tile> tiles;
+
+    void add_tile(const Tile& tile_to_be_added);
+    void clear_tiles();
+    void remove(const Tile& tile);
+    Tile get_tile(int tilex, int tiley);
+};
+
+struct Chunk {
+    std::string name;
+    Vec2 pos;
+    Tiles tiles;
+};
+
+struct Chunks {
+    std::vector<Chunk> chunks;
+
+    void add_chunk(Chunk& chunk_to_be_added);
+    void clear_chunks();
+    bool contains(const Chunk& chunk);
+    void remove(const Chunk& chunk);
+
+};
+
+Vec2 addVec2pos(const Vec2 pos1, const Vec2 pos2);
+Vec2 subVec2pos(const Vec2 pos1, const Vec2 pos2);
+Vec2 multiVec2pos(const Vec2 pos1, const Vec2 pos2, float multi);
+
+Vec2 addVec2posx(const Vec2 pos, float tobeadded);
+Vec2 addVec2posy(const Vec2 pos, float tobeadded);
+
+
+Vec2 getworldcords(Vec2 tilepos, Vec2 chunkpos, float tiles_per_chunk);
+========== [ END OF utils.hpp ] ==========
+
+========== [ START OF game_engine.hpp ] ==========
+#pragma once
+
+#include "world.hpp"
+#include "utils.hpp"
+#include "engine.hpp"
+
+struct GameEngine {
+    int screen_width; // define this at start of game engine instance
+    int screen_height; // define this at start of game engine instance
+    int* fps = nullptr; // define this at start of game engine instance
+
+    int* tiles_on_screenx = nullptr; // define this at start of game engine instance    
+    int* tiles_on_screeny = nullptr; // define this at start of game engine instance  
+
+    Vec2 tilesize_on_screen; // this will be calculated in init()
+
+    Engine2D* engine = nullptr; // define this at start of game engine instance
+    World* world = nullptr; // define this at start of game engine instance
+
+    // --- WINDOW STRUCT ---
+    struct Window {
+        World* world = nullptr;
+        Vec2 window_pos;
+        int window_sizex = 0;
+        int window_sizey = 0;
+
+        Chunks chunks_in_window(); // function
+        Tiles tiles_in_window();
+
+        Chunks chunks_in_win;
+        Tiles tiles_in_win;
+    };
+
+    // --- PLAYER STRUCT ---
+    struct Player {
+        Engine2D* engine = nullptr; // define this at first instance
+        World* world = nullptr; // define this at first instance
+
+
+        Vec2 tilesize_on_screen; // defined in init() --usage for drawing player
+        Tile isontile; // defined in init() --usage for drawing player and for movement
+        Vec2 player_pos_on_screen; // defined in init() --usage for drawing player
+        Vec2 chunkpos; // defined in init() --usage the position of the chunk the player is on
+        Vec2 tilepos; // defined in init() --usage the position of the tile the player is on
+        Vec2 worldpos; // defined in init() --usage the position of the player in the world
+
+        void move_player(Vec2 amount, World& world);
+        void DrawPlayer();
+
+        void init();
+    };
+
+    // --- ENGINE FUNCTIONS ---
+    void StartEngine(); 
+    void DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine);
+    void DrawWindow(const Window& window, Engine2D& engine, World& world);
+    
+    // -- INIT -- 
+    // to set calculated consts
+    void init();
+
+};
+
+========== [ END OF game_engine.hpp ] ==========
+

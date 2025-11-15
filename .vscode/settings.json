@@ -81,6 +81,7 @@
         "future": "cpp",
         "shared_mutex": "cpp",
         "stack": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "source_location": "cpp"
     }
 }

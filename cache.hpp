@@ -1,6 +1,6 @@
 #pragma once
 
-#include "world.hpp"
+#include "utils.hpp"
 
 struct Cache {
     Chunks loaded_chunks;

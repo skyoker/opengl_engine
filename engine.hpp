@@ -21,6 +21,7 @@ struct Engine2D {
     void drawTriangle(const Vec2& a, const Vec2& b, const Vec2& c, const Vec3& color);
     void drawRect(const float width, const float height, const Vec3& color, const Vec2& tlpos);
     void drawCircle(float radius, const Vec2& center, int points, Vec3 color);
+    int width, height;
 
 
 
@@ -30,7 +31,6 @@ private:
     GLuint shaderProgram;
     GLuint VAO, VBO;
 
-    int width, height;
 
     GLuint createShaderProgram();
 };  

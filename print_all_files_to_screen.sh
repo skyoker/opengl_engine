@@ -6,12 +6,9 @@ filelist="all_code_files.txt"
 # loop through each filename
 while IFS= read -r file; do
     # check if file exists before printing
-    if [[ -f "$file" ]]; then
-        echo "========== [ START OF $file ] =========="
-        cat "$file"
-        echo "========== [ END OF $file ] =========="
-        echo
-    else
-        echo "[!] File '$file' not found, skipping..."
-    fi
+    echo "========== [ START OF $file ] =========="
+    cat "$file"
+    echo "========== [ END OF $file ] =========="
+    echo
+    
 done < "$filelist"
