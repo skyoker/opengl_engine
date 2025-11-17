@@ -139,7 +139,7 @@ void Testing::TestDrawTile() {
 
         for (const auto& tile : chunk.tiles.tiles) {
             Vec2 screenPos = {-1.0f, 0.0f};
-            gameEngine.DrawTile(screenPos, tile, engine);
+            gameEngine.DrawTile(screenPos, tile);
         }
 
         engine.endFrame();

@@ -6,11 +6,28 @@ int main() {
     int FPS = 60;
     int TILES_ON_SCREEN_X = 20;
     int TILES_ON_SCREEN_Y = 20;
+    fs::path PATH_TO_WORLD_ON_DISK = "../world";
+
 
     GenWorld genworld; // does not require init params
-    genworld.generate_world(); // generates the game world on disk 
-
+    Engine2D engine;
+    Cache cache;
+    World world;
     GameEngine gameengine;
+
+
+    // -- genworld --
+    genworld.generate_world(); // generates the game world on disk 
+    // -- engine --
+    // nothing to do
+    // -- cache --
+    // nothing to do 
+    // -- world --
+    world.path_to_world = &PATH_TO_WORLD_ON_DISK;
+    world.cache = &cache;
+    world.init();
+    // -- gameengine --
+    gameengine.world = &world;
     gameengine.screen_width = 1000;
     gameengine.screen_height = 1000;
     gameengine.fps = &FPS;

@@ -12,7 +12,6 @@ void GenWorld::make_world_folder() {
     fs::create_directory(FOLDER_PATH);
 }
 
-
 void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
     std::string file_name = "ch" + std::to_string(chunk_x) + "x" + std::to_string(chunk_y) + "y.json";
     fs::path file_path = FOLDER_PATH / file_name;
@@ -26,7 +25,7 @@ void GenWorld::create_chunk_file(int chunk_x, int chunk_y) {
     chunk_file << "{\n";
     for (int tile_x = 0; tile_x < TILES_PER_CHUNK; ++tile_x) {
         for (int tile_y = 0; tile_y < TILES_PER_CHUNK; ++tile_y) {
-            chunk_file << "    \"t" << tile_x << "x" << tile_y << "y\": {\"type\": \"NULL\"}";
+            chunk_file << "    \"t" << tile_x << "x" << tile_y << "y\": {\"type\": \"NULL\"}"; // here one can set the empty tile type
             if (!(tile_x == TILES_PER_CHUNK - 1 && tile_y == TILES_PER_CHUNK - 1)) {
                 chunk_file << ",";
             }
@@ -56,6 +55,7 @@ void GenWorld::create_meta_file(int tiles_per_chunk, int chunks_per_worldx, int 
 
     file.close();
 }
+
 void GenWorld::generate_world() {
     make_world_folder();
     create_meta_file(TILES_PER_CHUNK, CHUNKS_PER_WORLDX, CHUNKS_PER_WORLDY);

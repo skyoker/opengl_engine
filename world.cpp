@@ -5,22 +5,23 @@
 #include "utils.hpp"
 
 Chunk World::LoadChunk(int xpos, int ypos) {
-    // make a temp chunk struct to compare pos 
-
+    // temp struct for cache check
     Chunk temp;
     temp.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
 
-    // 1 heck if it’s already cached
+    // 1 check cache
     if (cache->is_chunk_loaded(temp)) {
         for (auto& cached_chunk : cache->loaded_chunks.chunks) {
             if (cached_chunk.pos.x == temp.pos.x && cached_chunk.pos.y == temp.pos.y) {
-                return cached_chunk; // return cached version
+                return cached_chunk;
             }
         }
     }
 
-    // 2 load from file since it ain’t cached
-    std::string chunkfilename = "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
+    // 2 load from file
+    std::string chunkfilename =
+        "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
+
     fs::path chunkpath = *path_to_world / chunkfilename;
 
     std::ifstream file(chunkpath);
@@ -37,21 +38,34 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     chunk.pos = {static_cast<float>(xpos), static_cast<float>(ypos)};
     chunk.name = chunkfilename;
 
+    // 3 parse tiles
     for (auto& [tileKey, tileValue] : j.items()) {
         Tile tile;
-        tile.inside_chunk_pos.x = tileValue.value("x", 0);
-        tile.inside_chunk_pos.y = tileValue.value("y", 0);
+
+        // Parse key: "t0x6y"
+        int tx = 0, ty = 0;
+        sscanf(tileKey.c_str(), "t%dx%dy", &tx, &ty);
+
+        tile.inside_chunk_pos.x = tx;
+        tile.inside_chunk_pos.y = ty;
         tile.chunk_pos = chunk.pos;
-        tile.type = StringToTileType(tileValue.value("type", "null"));
+
+        // Extract tile type string
+        std::string type_str = tileValue["type"];
+
+        // Convert to enum
+        tile.type = StringToTileType(type_str);
+
         chunk.tiles.add_tile(tile);
     }
 
-    // 3 add to cache
+    // 4 add to cache
     cache->add_chunk_to_cache(chunk);
 
-    // 4 return the freshly loaded one
+    // 5 return loaded chunk
     return chunk;
 }
+
 
 Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
     Tile tile;

@@ -17,8 +17,7 @@ void GameEngine::Player::move_player(Vec2 amount, World& world) {
     
 }
 
-
-void GameEngine::Player::DrawPlayer() {
+void GameEngine::Player::DrawPlayer(Vec2 tos) { // tos stands for tilesize on screen
     Vec3 player_color = {1.0f, 0.0f, 0.0f}; // red
 
     if (!engine || !engine->isRunning()) {
@@ -27,8 +26,8 @@ void GameEngine::Player::DrawPlayer() {
     }
 
     engine->drawRect(
-        tilesize_on_screen.x,
-        tilesize_on_screen.y,
+        tos.x,
+        tos.y,
         player_color,
         player_pos_on_screen
     );
@@ -82,19 +81,19 @@ Tiles GameEngine::Window::tiles_in_window() {
     return tiles_in_win;
 }
 
-// --- DRAWING ---
+// --- ENGINE ---
 
-void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
-    if (!engine.isRunning()) {
+void GameEngine::DrawTile(Vec2 pos, const Tile& tile) {
+    if (!engine->isRunning()) {
         std::cerr << "Engine is not running, cannot draw to screen.\n";
         return;
     }
 
-    Vec3 white = {1.0f, 1.0f, 1.0f};
+    Vec3 blue = {0.0f, 0.0f, 1.0f};
 
     switch (tile.type) {
         case TileType::Null:
-            engine.drawRect(tilesize_on_screen.x, tilesize_on_screen.y, white, pos);
+            engine->drawRect(tilesize_on_screen.x, tilesize_on_screen.y, blue, pos);
             break;
         case TileType::Wall:
         case TileType::Rock:
@@ -104,62 +103,51 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine) {
     }
 }
 
-// --- MAIN LOOP ---
-
 void GameEngine::StartEngine() {
     fs::path path_world_on_disk = "../world";
 
 
-    Engine2D engine(screen_width, screen_height);  // first and only engine instance
-    Cache cache; // first and only cache instance
-
-    World world; // first and only world instance
-    world.path_to_world = &path_world_on_disk;
-    world.cache = &cache;
-    world.init();
-
-
     Player player;  // created player instance
-    player.engine = &engine; // set player pointer to init engine 
-    player.world = &world;
+    player.engine = engine; // set player pointer to init engine 
+    player.world = world;
     player.init(); // set player pointer to init world
 
 
     Window window;
-    window.world = &world; 
+    window.world = world; 
     window.window_sizex = *tiles_on_screenx;
     window.window_sizey = *tiles_on_screeny;
 
-    while (engine.isRunning()) {
-        engine.beginFrame();
+    while (engine->isRunning()) {
+        engine->beginFrame();
 
         window.window_pos = subVec2pos(Vec2{
-                                  getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world.tiles_per_chunk).x,
-                                  getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world.tiles_per_chunk).y},
+                                  getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world->tiles_per_chunk).x,
+                                  getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world->tiles_per_chunk).y},
 
                                   Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
 
         window.chunks_in_win = window.chunks_in_window(); 
         window.tiles_in_win = window.tiles_in_window(); 
 
-        DrawWindow(window, engine, world); 
-        player.DrawPlayer(); 
+        DrawWindow(window); 
+        player.DrawPlayer(tilesize_on_screen); 
 
-        engine.endFrame(); 
+        engine->endFrame();
     }
 }
 
-void GameEngine::DrawWindow(const Window& window, Engine2D& engine, World& world) {
+void GameEngine::DrawWindow(const Window& window) {
     for (const auto& tile : window.tiles_in_win.tiles) {
-        int world_x = static_cast<int>(tile.chunk_pos.x) * world.tiles_per_chunk + tile.inside_chunk_pos.x;
-        int world_y = static_cast<int>(tile.chunk_pos.y) * world.tiles_per_chunk + tile.inside_chunk_pos.y;
+        int world_x = static_cast<int>(tile.chunk_pos.x) * world->tiles_per_chunk + tile.inside_chunk_pos.x;
+        int world_y = static_cast<int>(tile.chunk_pos.y) * world->tiles_per_chunk + tile.inside_chunk_pos.y;
 
         Vec2 tile_screen_pos = {
             (world_x - window.window_pos.x) * tilesize_on_screen.x,
             (world_y - window.window_pos.y) * tilesize_on_screen.y
         };
 
-        DrawTile(tile_screen_pos, tile, engine);
+        DrawTile(tile_screen_pos, tile);
     }
 }
 

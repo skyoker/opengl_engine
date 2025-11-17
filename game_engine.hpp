@@ -42,15 +42,15 @@ struct GameEngine {
         Vec2 player_pos_on_screen; // defined in init() --usage for drawing player
 
         void move_player(Vec2 amount, World& world);
-        void DrawPlayer();
+        void DrawPlayer(Vec2 tos); // tilesize on screen is tos
 
         void init();
     };
 
     // --- ENGINE FUNCTIONS ---
     void StartEngine(); 
-    void DrawTile(Vec2 pos, const Tile& tile, Engine2D& engine);
-    void DrawWindow(const Window& window, Engine2D& engine, World& world);
+    void DrawTile(Vec2 pos, const Tile& tile);
+    void DrawWindow(const Window& window);
     
     // -- INIT -- 
     // to set calculated consts
