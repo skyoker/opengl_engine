@@ -66,7 +66,6 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     return chunk;
 }
 
-
 Tile World::GetTile(int xpos, int ypos, const Chunk& chunk) {
     Tile tile;
     tile.inside_chunk_pos.x = xpos;

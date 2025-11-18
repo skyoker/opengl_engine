@@ -125,7 +125,7 @@ void GameEngine::StartEngine() {
                                   getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world->tiles_per_chunk).x,
                                   getworldcords(player.isontile.inside_chunk_pos, player.isontile.chunk_pos, world->tiles_per_chunk).y},
 
-                                  Vec2{static_cast<float>(*tiles_on_screenx), static_cast<float>(*tiles_on_screeny)});
+                                  Vec2{static_cast<float>(*tiles_on_screenx) / 2, static_cast<float>(*tiles_on_screeny) / 2});
 
         window.chunks_in_win = window.chunks_in_window(); 
         window.tiles_in_win = window.tiles_in_window(); 

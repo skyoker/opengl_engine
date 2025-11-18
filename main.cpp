@@ -6,11 +6,14 @@ int main() {
     int FPS = 60;
     int TILES_ON_SCREEN_X = 20;
     int TILES_ON_SCREEN_Y = 20;
+    int SCREEN_W = 800;
+    int SCREEN_H = 800;
+    
     fs::path PATH_TO_WORLD_ON_DISK = "../world";
 
 
     GenWorld genworld; // does not require init params
-    Engine2D engine;
+    Engine2D engine(SCREEN_W, SCREEN_H);
     Cache cache;
     World world;
     GameEngine gameengine;
@@ -33,6 +36,7 @@ int main() {
     gameengine.fps = &FPS;
     gameengine.tiles_on_screenx = &TILES_ON_SCREEN_X;
     gameengine.tiles_on_screeny = &TILES_ON_SCREEN_Y;
+    gameengine.engine = &engine;
     gameengine.init();
 
     gameengine.StartEngine();

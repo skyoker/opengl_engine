@@ -87,8 +87,11 @@ Engine2D::~Engine2D() {
 
 // frame control
 bool Engine2D::isRunning() { return !glfwWindowShouldClose(window); }
-void Engine2D::beginFrame() { glClearColor(0.1f, 0.1f, 0.12f, 1.0f); glClear(GL_COLOR_BUFFER_BIT); }
-void Engine2D::endFrame() { glfwSwapBuffers(window); glfwPollEvents(); }
+int frames_done = 0;
+int current_frame = 0;
+
+void Engine2D::beginFrame() { glClearColor(0.1f, 0.1f, 0.12f, 1.0f); glClear(GL_COLOR_BUFFER_BIT); current_frame = frames_done + 1;}
+void Engine2D::endFrame() { glfwSwapBuffers(window); glfwPollEvents(); frames_done =+ 1;}
 
 // fast triangle draw
 

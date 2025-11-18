@@ -5,10 +5,10 @@
       "name": "Debug Existing Binary",
       "type": "cppdbg",
       "request": "launch",
-      "program": "/home/skyoker/Documents/CODE/opengl/build/Engine2D",
+      "program": "/home/skyoker/Documents/code/opengl_engine/build/Engine2D",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "/home/skyoker/Documents/CODE/opengl",
+      "cwd": "/home/skyoker/Documents/code/opengl_engine",
       "MIMode": "gdb",
       "externalConsole": false
     }
