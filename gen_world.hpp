@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "utils.hpp"
+
 namespace fs = std::filesystem;
 
 struct GenWorld {
@@ -16,7 +18,7 @@ struct GenWorld {
     void make_world_folder();
     void create_chunk_file(int chunk_x, int chunk_y);
     void create_meta_file(int tiles_per_chunk, int chunks_per_worldx, int chunks_per_worldy);
-    void insert_tile_on_chunk();
+    void insert_tile_on_chunk(fs::path chunk_path, Vec2 tp, TileType tt);
 
 
     void random_wall_placement(float randomness);
