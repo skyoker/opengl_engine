@@ -6,8 +6,8 @@ int main() {
     int FPS = 60;
     int TILES_ON_SCREEN_X = 20;
     int TILES_ON_SCREEN_Y = 20;
-    int SCREEN_W = 800;
-    int SCREEN_H = 800;
+    int SCREEN_W = 1000;
+    int SCREEN_H = 1000;
     
     fs::path PATH_TO_WORLD_ON_DISK = "../world";
 
@@ -31,8 +31,8 @@ int main() {
     world.init();
     // -- gameengine --
     gameengine.world = &world;
-    gameengine.screen_width = 1000;
-    gameengine.screen_height = 1000;
+    gameengine.screen_width = SCREEN_W;
+    gameengine.screen_height = SCREEN_H;
     gameengine.fps = &FPS;
     gameengine.tiles_on_screenx = &TILES_ON_SCREEN_X;
     gameengine.tiles_on_screeny = &TILES_ON_SCREEN_Y;

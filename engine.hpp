@@ -26,12 +26,12 @@ struct Engine2D {
 
 
 
-private:
-    GLFWwindow* window;
-    GLuint shaderProgram;
-    GLuint VAO, VBO;
+    private:
+        GLFWwindow* window;
+        GLuint shaderProgram;
+        GLuint VAO, VBO;
 
 
-    GLuint createShaderProgram();
+        GLuint createShaderProgram();
 };  
 

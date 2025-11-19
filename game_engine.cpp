@@ -34,14 +34,10 @@ void GameEngine::Player::DrawPlayer(Vec2 tos) { // tos stands for tilesize on sc
 }
 
 void GameEngine::Player::init() {
-    tilesize_on_screen = {
-        2.0f / static_cast<float>(engine->width) * static_cast<float>(world->tiles_per_chunk),
-        2.0f / static_cast<float>(engine->height) * static_cast<float>(world->tiles_per_chunk)
-    };
-
+    // Removed incorrect tilesize calculation (was using engine pixel dims * tiles_per_chunk).
+    // Player will use GameEngine::tilesize_on_screen when drawing.
     isontile = world->spawntile;
     player_pos_on_screen = {0.0f, 0.0f};
-
 }
 
 // --- WINDOW ---
@@ -56,11 +52,14 @@ Chunks GameEngine::Window::chunks_in_window() {
 
     if (!world) return chunks_in_win;
 
-    for (int cx = win_startx / (world->tiles_per_chunk * window_sizex);
-         cx <= win_endx / (world->tiles_per_chunk * window_sizex); cx++) {
-        for (int cy = win_starty / (world->tiles_per_chunk * window_sizey);
-             cy <= win_endy / (world->tiles_per_chunk * window_sizey); cy++) {
+    // Corrected chunk index calculation: divide by tiles_per_chunk only.
+    int cx_start = std::max(0, win_startx / world->tiles_per_chunk);
+    int cy_start = std::max(0, win_starty / world->tiles_per_chunk);
+    int cx_end = std::min(world->chunks_per_worldx - 1, win_endx / world->tiles_per_chunk);
+    int cy_end = std::min(world->chunks_per_worldy - 1, win_endy / world->tiles_per_chunk);
 
+    for (int cx = cx_start; cx <= cx_end; cx++) {
+        for (int cy = cy_start; cy <= cy_end; cy++) {
             Chunk chunk = world->LoadChunk(cx, cy);
             chunks_in_win.add_chunk(chunk);
         }
@@ -106,12 +105,10 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile) {
 void GameEngine::StartEngine() {
     fs::path path_world_on_disk = "../world";
 
-
     Player player;  // created player instance
     player.engine = engine; // set player pointer to init engine 
     player.world = world;
     player.init(); // set player pointer to init world
-
 
     Window window;
     window.world = world; 
@@ -131,7 +128,13 @@ void GameEngine::StartEngine() {
         window.tiles_in_win = window.tiles_in_window(); 
 
         DrawWindow(window); 
-        player.DrawPlayer(tilesize_on_screen); 
+        // draw player using GameEngine::tilesize_on_screen (correct tile-size in NDC)
+        engine->drawRect(
+            tilesize_on_screen.x,
+            tilesize_on_screen.y,
+            Vec3{1.0f, 0.0f, 0.0f},
+            Vec2{0.0f, 0.0f}
+        );
 
         engine->endFrame();
     }
@@ -139,12 +142,13 @@ void GameEngine::StartEngine() {
 
 void GameEngine::DrawWindow(const Window& window) {
     for (const auto& tile : window.tiles_in_win.tiles) {
-        int world_x = static_cast<int>(tile.chunk_pos.x) * world->tiles_per_chunk + tile.inside_chunk_pos.x;
-        int world_y = static_cast<int>(tile.chunk_pos.y) * world->tiles_per_chunk + tile.inside_chunk_pos.y;
+        int world_x = static_cast<int>(tile.chunk_pos.x) * world->tiles_per_chunk + static_cast<int>(tile.inside_chunk_pos.x);
+        int world_y = static_cast<int>(tile.chunk_pos.y) * world->tiles_per_chunk + static_cast<int>(tile.inside_chunk_pos.y);
 
+        // Map to normalized device coords (-1 .. 1).
         Vec2 tile_screen_pos = {
-            (world_x - window.window_pos.x) * tilesize_on_screen.x,
-            (world_y - window.window_pos.y) * tilesize_on_screen.y
+            (world_x - window.window_pos.x) * tilesize_on_screen.x - 1.0f,
+            (world_y - window.window_pos.y) * tilesize_on_screen.y - 1.0f
         };
 
         DrawTile(tile_screen_pos, tile);

@@ -16,6 +16,12 @@ struct GenWorld {
     void make_world_folder();
     void create_chunk_file(int chunk_x, int chunk_y);
     void create_meta_file(int tiles_per_chunk, int chunks_per_worldx, int chunks_per_worldy);
+    void insert_tile_on_chunk();
+
+
+    void random_wall_placement(float randomness);
+
+
     void generate_world();
 };
 
