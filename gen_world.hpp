@@ -3,15 +3,19 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 #include "utils.hpp"
 
+using json = nlohmann::json;
 namespace fs = std::filesystem;
 
 struct GenWorld {
     const int TILES_PER_CHUNK = 8;
     const int CHUNKS_PER_WORLDX = 10;
     const int CHUNKS_PER_WORLDY = 10;
+
+    int* seed; // set this at init
 
     const fs::path FOLDER_PATH = "../world";
 
@@ -25,5 +29,5 @@ struct GenWorld {
 
 
     void generate_world();
+    void gencustom_world();
 };
-

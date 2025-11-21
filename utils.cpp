@@ -29,7 +29,7 @@ Vec2 addVec2posx(const Vec2 pos, float tobeadded) {
 Vec2 addVec2posy(const Vec2 pos, float tobeadded) {
     Vec2 new_pos{pos.x, pos.y + tobeadded};
 
-    return new_pos;
+    return new_pos; 
 }
 
 Vec2 multiVec2pos(const Vec2 pos, float multiplier ) {
@@ -50,7 +50,6 @@ void Chunks::add_chunk(Chunk& chunk_to_be_added) {
 }
 
 void Chunks::clear_chunks() {
-
 
     chunks.clear();
 }
@@ -113,4 +112,16 @@ Tile Tiles::get_tile(int tilex, int tiley) {
 void Tiles::clear_tiles() {
     tiles.clear();
 
+}
+
+int randomFromSeed(int seed, int min, int max) {
+    std::mt19937 generator(seed);            // Mersenne Twister seeded
+    std::uniform_int_distribution<int> dist(min, max);
+    return dist(generator);
+}
+
+std::string get_chunk_string(int chunkx, int chunky) {
+    std::string out;
+    out + "ch" + std::to_string(chunkx) + "x" + std::to_string(chunky) + "y.json"; 
+    return out;
 }

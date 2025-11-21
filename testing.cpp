@@ -145,3 +145,12 @@ void Testing::TestDrawTile() {
         engine.endFrame();
     }
 }
+
+void Testing::gendebugworld() {
+    GenWorld genw;
+    int rnd = 3;
+
+    genw.generate_world();
+    genw.random_wall_placement(rnd);
+
+}

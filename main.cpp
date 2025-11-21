@@ -6,8 +6,8 @@ int main() {
     int FPS = 60;
     int TILES_ON_SCREEN_X = 20;
     int TILES_ON_SCREEN_Y = 20;
-    int SCREEN_W = 1000;
-    int SCREEN_H = 1000;
+    int SCREEN_W = 800;
+    int SCREEN_H = 800;
     
     fs::path PATH_TO_WORLD_ON_DISK = "../world";
 

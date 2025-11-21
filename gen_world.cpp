@@ -68,3 +68,81 @@ void GenWorld::generate_world() {
 
 }
 
+void GenWorld::insert_tile_on_chunk(fs::path chunk_path, Vec2 tp, TileType tt)
+{
+    // Resolve path if needed
+    if (!fs::exists(chunk_path)) {
+        fs::path p = FOLDER_PATH / chunk_path;
+        if (fs::exists(p)) chunk_path = p;
+    }
+
+    if (!fs::exists(chunk_path)) {
+        std::cerr << "Chunk file does not exist: " << chunk_path << "\n";
+        return;
+    }
+
+    // Load JSON
+    std::ifstream infile(chunk_path);
+    if (!infile.is_open()) {
+        std::cerr << "Failed to open chunk file for reading: " << chunk_path << "\n";
+        return;
+    }
+
+    nlohmann::json j;
+    try {
+        infile >> j;
+    } catch (std::exception &e) {
+        std::cerr << "JSON parse error in " << chunk_path << ": " << e.what() << "\n";
+        return;
+    }
+    infile.close();
+
+    int tilex = static_cast<int>(tp.x);
+    int tiley = static_cast<int>(tp.y);
+
+    // Key format: t{X}x{Y}y
+    std::string key = "t" + std::to_string(tilex) +
+                      "x" + std::to_string(tiley) +
+                      "y";
+
+    // Validate the tile exists
+    if (!j.contains(key)) {
+        std::cerr << "Tile key not found: " << key << " in " << chunk_path << "\n";
+        return;
+    }
+
+    // Convert enum to string
+    std::string newTypeStr = (tt == TileType::Null)
+                             ? "NULL"
+                             : TileTypeToString(tt);
+
+    // Apply update safely
+    j[key]["type"] = newTypeStr;
+
+    // Save JSON back to file
+    std::ofstream outfile(chunk_path, std::ios::trunc);
+    if (!outfile.is_open()) {
+        std::cerr << "Failed to open chunk file for writing: " << chunk_path << "\n";
+        return;
+    }
+
+    outfile << j.dump(4); // pretty-print with indentation
+    outfile.close();
+}
+
+void GenWorld::random_wall_placement(float randomness) {
+    for (int chunkx = 0; chunkx < CHUNKS_PER_WORLDX; chunkx++) {
+        for (int chunky = 0; chunky < CHUNKS_PER_WORLDY; chunky++) {
+            for (int tilex = 0; tilex < TILES_PER_CHUNK; tilex++) {
+                for (int tiley = 0; tiley < TILES_PER_CHUNK; tiley++) {
+                    int randomn = randomFromSeed(*seed, 0, static_cast<int>(randomness));
+                    if (randomn == static_cast<int>(randomness) - 1) {
+                        fs::path chpath = FOLDER_PATH / get_chunk_string(chunkx, chunky);
+                        Vec2 tp = {static_cast<float>(tilex), static_cast<float>(tiley)};
+                        insert_tile_on_chunk(chpath, tp, TileType::Wall);
+                    }
+                }
+            }
+        }
+    }
+}

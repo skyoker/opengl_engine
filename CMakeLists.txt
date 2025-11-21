@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 # sources
 
 set(SOURCES
-    main.cpp
+    test.cpp
     engine.cpp
     testing.cpp
     gen_world.cpp

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
 
 
 
@@ -89,3 +90,5 @@ Vec2 addVec2posy(const Vec2 pos, float tobeadded);
 
 
 Vec2 getworldcords(Vec2 tilepos, Vec2 chunkpos, float tiles_per_chunk);
+int randomFromSeed(int seed, int min, int max);
+std::string get_chunk_string(int chunkx, int chunky);
