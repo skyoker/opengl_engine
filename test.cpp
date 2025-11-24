@@ -4,7 +4,6 @@
 #include "testing.hpp"
 
 int main() {
-    GenWorld genworld;
     Testing testsuite;
      // does not require init params
     testsuite.gendebugworld();

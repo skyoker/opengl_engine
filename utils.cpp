@@ -114,14 +114,12 @@ void Tiles::clear_tiles() {
 
 }
 
-int randomFromSeed(int seed, int min, int max) {
-    std::mt19937 generator(seed);            // Mersenne Twister seeded
-    std::uniform_int_distribution<int> dist(min, max);
-    return dist(generator);
-}
+
 
 std::string get_chunk_string(int chunkx, int chunky) {
     std::string out;
-    out + "ch" + std::to_string(chunkx) + "x" + std::to_string(chunky) + "y.json"; 
+    out = out + "ch" + std::to_string(chunkx) + "x" + std::to_string(chunky) + "y.json"; 
     return out;
+
+
 }

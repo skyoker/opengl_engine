@@ -16,6 +16,7 @@ struct GenWorld {
     const int CHUNKS_PER_WORLDY = 10;
 
     int* seed; // set this at init
+    std::mt19937 generator;
 
     const fs::path FOLDER_PATH = "../world";
 
@@ -29,5 +30,5 @@ struct GenWorld {
 
 
     void generate_world();
-    void gencustom_world();
+    void init(); // call this in the start
 };

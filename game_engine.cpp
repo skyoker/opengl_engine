@@ -88,13 +88,16 @@ void GameEngine::DrawTile(Vec2 pos, const Tile& tile) {
         return;
     }
 
-    Vec3 blue = {0.0f, 0.0f, 1.0f};
+    Vec3 unknown_blue = {0.0f, 0.0f, 1.0f};
+    Vec3 wall_red = {1.0f, 0.0f, 0.0f};
 
     switch (tile.type) {
         case TileType::Null:
-            engine->drawRect(tilesize_on_screen.x, tilesize_on_screen.y, blue, pos);
+            engine->drawRect(tilesize_on_screen.x, tilesize_on_screen.y, unknown_blue, pos);
             break;
         case TileType::Wall:
+            engine->drawRect(tilesize_on_screen.x, tilesize_on_screen.y, wall_red, pos);
+            break;
         case TileType::Rock:
         case TileType::Unknown:
             // TODO: draw other tile types

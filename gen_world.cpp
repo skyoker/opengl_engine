@@ -131,13 +131,16 @@ void GenWorld::insert_tile_on_chunk(fs::path chunk_path, Vec2 tp, TileType tt)
 }
 
 void GenWorld::random_wall_placement(float randomness) {
+    int randomn;
     for (int chunkx = 0; chunkx < CHUNKS_PER_WORLDX; chunkx++) {
         for (int chunky = 0; chunky < CHUNKS_PER_WORLDY; chunky++) {
             for (int tilex = 0; tilex < TILES_PER_CHUNK; tilex++) {
                 for (int tiley = 0; tiley < TILES_PER_CHUNK; tiley++) {
-                    int randomn = randomFromSeed(*seed, 0, static_cast<int>(randomness));
+                    randomn = randomFromSeed(generator, 0, static_cast<int>(randomness));
+
                     if (randomn == static_cast<int>(randomness) - 1) {
-                        fs::path chpath = FOLDER_PATH / get_chunk_string(chunkx, chunky);
+                        std::string chstrpath = get_chunk_string(chunkx, chunky);
+                        std::string chpath = std::string(FOLDER_PATH) + "/" + chstrpath;
                         Vec2 tp = {static_cast<float>(tilex), static_cast<float>(tiley)};
                         insert_tile_on_chunk(chpath, tp, TileType::Wall);
                     }
@@ -145,4 +148,10 @@ void GenWorld::random_wall_placement(float randomness) {
             }
         }
     }
+}
+
+void GenWorld::init() {
+    generator = std::mt19937(*seed);            // Mersenne Twister seeded
+
+
 }

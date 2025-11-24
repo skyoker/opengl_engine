@@ -1,5 +1,6 @@
 # ignore build and cmake-generated stuff
 /build/
+/.vscode/
 /CMakeFiles/
 /CMakeCache.txt
 /cmake_install.cmake

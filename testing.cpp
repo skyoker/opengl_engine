@@ -148,8 +148,10 @@ void Testing::TestDrawTile() {
 
 void Testing::gendebugworld() {
     GenWorld genw;
+    int seed = 0;
     int rnd = 3;
-
+    genw.seed = &seed;
+    genw.init();
     genw.generate_world();
     genw.random_wall_placement(rnd);
 

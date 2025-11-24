@@ -39,6 +39,12 @@ inline std::string TileTypeToString(TileType type) {
     }
 }
 
+inline int randomFromSeed(std::mt19937& gen, int min, int max) {
+    std::uniform_int_distribution<int> dist(min, max);
+    return dist(gen);
+}
+
+
 template<typename K, typename V>
 const V* safeloc(const std::map<K, V>& map, const K& key) {
     auto it = map.find(key);
@@ -90,5 +96,4 @@ Vec2 addVec2posy(const Vec2 pos, float tobeadded);
 
 
 Vec2 getworldcords(Vec2 tilepos, Vec2 chunkpos, float tiles_per_chunk);
-int randomFromSeed(int seed, int min, int max);
 std::string get_chunk_string(int chunkx, int chunky);
