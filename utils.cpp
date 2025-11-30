@@ -114,7 +114,69 @@ void Tiles::clear_tiles() {
 
 }
 
+void Textures::add_tex(Texture tex) {
+    textures.push_back(tex);
 
+}
+
+void Textures::clear_tex() {
+    textures.clear();
+}
+
+bool Textures::contains(Texture tex) {
+    for (const auto& t : textures) {
+        if (t.tt == tex.tt) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Textures::remove(Texture tex) {
+    textures.erase(
+        std::remove_if(
+            textures.begin(),
+            textures.end(),
+            [&](const Texture& t) {
+                return t.tt == tex.tt;
+            }),
+        textures.end()
+    );
+}
+   
+void Rooms::add_room(Room& room_to_be_added) {
+    rooms.push_back(room_to_be_added);
+}
+
+void Rooms::add_rooms(Rooms& rooms_to_be_added) {
+    for (int i = 0; i < rooms_to_be_added.rooms.size(); i++) {
+        rooms.push_back(rooms_to_be_added.rooms[i]);
+    }
+}
+
+void Rooms::clear_rooms() {
+    rooms.clear();
+}
+
+bool Rooms::contains(const Room& room) {
+    for (const auto& r : rooms) {
+        if (r.world_posx == room.world_posx && r.world_posy == room.world_posy)
+            return true;
+    }
+    return false;
+}
+
+void Rooms::remove(const Room& room) {
+    rooms.erase(
+        std::remove_if(
+            rooms.begin(),
+            rooms.end(),
+            [&](const Room& r) {
+                return r.world_posx == room.world_posx && r.world_posy == room.world_posy;
+            }),
+        rooms.end()
+    );
+}
 
 std::string get_chunk_string(int chunkx, int chunky) {
     std::string out;

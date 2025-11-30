@@ -15,6 +15,8 @@ set(SOURCES
     utils.cpp
     game_engine.cpp
     cache.cpp
+    textures.cpp
+    stb_image_impl.cpp
 )
 
 # headers

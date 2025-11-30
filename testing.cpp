@@ -58,7 +58,7 @@ void Testing::Testdrawcircle() {
 
 void Testing::Testgenworld() {
     GenWorld genworld;
-    genworld.generate_world();
+    genworld.generate_empty_world();
 }
 
 void Testing::TestLoadChunk() {
@@ -152,7 +152,7 @@ void Testing::gendebugworld() {
     int rnd = 3;
     genw.seed = &seed;
     genw.init();
-    genw.generate_world();
+    genw.generate_empty_world();
     genw.random_wall_placement(rnd);
 
 }

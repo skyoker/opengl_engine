@@ -12,10 +12,13 @@ struct GameEngine {
     int* tiles_on_screenx = nullptr; // define this at start of game engine instance    
     int* tiles_on_screeny = nullptr; // define this at start of game engine instance  
 
+    bool* texurized = nullptr; // define this at start of game engine instance
+
     Vec2 tilesize_on_screen; // this will be calculated in init()
 
     Engine2D* engine = nullptr; // define this at start of game engine instance
     World* world = nullptr; // define this at start of game engine instance
+    TextureMng* texmng = nullptr; // define this at start of game engine instance
 
     // --- WINDOW STRUCT ---
     struct Window {
@@ -51,6 +54,8 @@ struct GameEngine {
     void StartEngine(); 
     void DrawTile(Vec2 pos, const Tile& tile);
     void DrawWindow(const Window& window);
+    void DrawtexWindow(const Window& window);
+    Vec3 getTileColor(TileType type);
     
     // -- INIT -- 
     // to set calculated consts

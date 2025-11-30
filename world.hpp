@@ -24,6 +24,7 @@ struct World {
     int chunks_per_worldx; // this will be set by init()
     int chunks_per_worldy; // this will be set by init()
 
+    
     Tile spawntile; // this will be set by init()
 
 

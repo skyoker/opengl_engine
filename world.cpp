@@ -19,8 +19,7 @@ Chunk World::LoadChunk(int xpos, int ypos) {
     }
 
     // 2 load from file
-    std::string chunkfilename =
-        "ch" + std::to_string(xpos) + "x" + std::to_string(ypos) + "y.json";
+    std::string chunkfilename = get_chunk_string(xpos, ypos);
 
     fs::path chunkpath = *path_to_world / chunkfilename;
 
@@ -98,6 +97,15 @@ Tile World::GetTileGlobal(int world_x, int world_y) {
 }
 
 void World::init() {
+    // Validate all required pointers are set
+    if (!cache) {
+        std::cerr << "ERROR World::init(): cache pointer not set!\n";
+        std::exit(1);
+    }
+    if (!path_to_world) {
+        std::cerr << "ERROR World::init(): path_to_world pointer not set!\n";
+        std::exit(1);
+    }
 
     // Load world info from disk from JSON files 
     std::string filename = "world_info.json";
@@ -116,12 +124,13 @@ void World::init() {
     tiles_per_chunk   = j.value("tiles_per_chunk", 0);
     chunks_per_worldx = j.value("chunks_per_worldx", 0);
     chunks_per_worldy = j.value("chunks_per_worldy", 0);
+    
 
     // Set spawntile (where the player starts)
-    spawntile = GetTile(
-        0, // first tile in the middle chunk. remember world cords are between 0 and tiles_per_chunk*chunks_per_worldx (80) 
-        0, // first tile in the middle chunk  
-        LoadChunk(chunks_per_worldx / 2, chunks_per_worldy / 2) // the middle chunk
-    );
+    // spawnpoint_x and spawnpoint_y are world coordinates (0 to tiles_per_chunk*chunks_per_worldx).
+    // Use GetTileGlobal which automatically converts world coords to chunk and tile-within-chunk.
+    int spawn_world_x = j.value("spawnpoint_x", 0);
+    int spawn_world_y = j.value("spawnpoint_y", 0);
+    spawntile = GetTileGlobal(spawn_world_x, spawn_world_y);
 
 }

@@ -25,10 +25,12 @@ be vectorized anyway
 static const char* vertexShaderSrc = R"( 
 #version 330 core
 layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec3 aColor;
 uniform vec3 uColor;
 out vec3 vColor;
 void main() {
-    vColor = uColor;
+    // Use per-vertex color if provided, otherwise use uniform color
+    vColor = aColor != vec3(0.0) ? aColor : uColor;
     gl_Position = vec4(aPos, 0.0, 1.0);
 }
 )";
@@ -58,7 +60,23 @@ Engine2D::Engine2D(int w, int h, const char* title)
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) { std::cerr << "GLEW init failed\n"; glfwTerminate(); exit(EXIT_FAILURE); }
 
-    glViewport(0, 0, width, height);
+    // On HiDPI displays (or when the window is resized) the framebuffer size
+    // can differ from the window size. Query the actual framebuffer size
+    // and use that for the GL viewport so rendering covers the full window.
+    int fbWidth = 0, fbHeight = 0;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    if (fbWidth == 0 || fbHeight == 0) {
+        // fallback to the logical window size if framebuffer query fails
+        fbWidth = width;
+        fbHeight = height;
+    }
+    glViewport(0, 0, fbWidth, fbHeight);
+
+    // Update viewport automatically when the framebuffer is resized
+    // (handles window resizes and DPI scaling changes).
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* /*win*/, int w, int h) {
+        glViewport(0, 0, w, h);
+    });
 
     shaderProgram = createShaderProgram();
 
@@ -130,7 +148,7 @@ void Engine2D::drawCircle(float radius, const Vec2& center, int points, Vec3 col
 
 
     for (int i = 0; i < points; i++) {
-        // two points on the circle’s edge
+        // two points on the circle's edge
         Vec2 p2 = {center.x + radius * static_cast<float>(cos(i * radians_per_triangle)),
                    center.y + radius * static_cast<float>(sin(i * radians_per_triangle))};
         Vec2 p3 = {center.x + radius * static_cast<float>(cos((i + 1) * radians_per_triangle)),
@@ -138,6 +156,42 @@ void Engine2D::drawCircle(float radius, const Vec2& center, int points, Vec3 col
 
         drawTriangle(center, p2, p3, color);
     }
+}
+
+void Engine2D::drawBatch(const std::vector<float>& vertices) {
+    // vertices format: x, y, r, g, b, x, y, r, g, b, ...
+    // 5 floats per vertex (2 position + 3 color)
+    
+    if (vertices.empty()) return;
+
+    glUseProgram(shaderProgram);
+    
+    GLuint batchVAO, batchVBO;
+    glGenVertexArrays(1, &batchVAO);
+    glGenBuffers(1, &batchVBO);
+
+    glBindVertexArray(batchVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, batchVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    // Position attribute (location 0)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color attribute (location 1)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // Set default uniform color (won't be used since per-vertex colors are provided)
+    GLint colorLoc = glGetUniformLocation(shaderProgram, "uColor");
+    glUniform3f(colorLoc, 1.0f, 1.0f, 1.0f);
+
+    // Draw all vertices
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 5);
+
+    // Cleanup
+    glDeleteBuffers(1, &batchVBO);
+    glDeleteVertexArrays(1, &batchVAO);
 }
 
 // shader creation

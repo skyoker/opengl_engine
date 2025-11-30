@@ -6,7 +6,8 @@
 int main() {
     Testing testsuite;
      // does not require init params
-    testsuite.gendebugworld();
+    //testsuite.gendebugworld();
+    testsuite.Testdrawtriangle();
 
     return 0;
 }
